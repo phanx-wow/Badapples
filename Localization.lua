@@ -10,6 +10,13 @@
 -- Updated by Phanx
 ------------------------------------------------------------------------------
 
+local EM_ON = "|cffffff00"
+local EM_OFF = "|r"
+local RED_ON = "|cffff4000"
+local RED_OFF = "|r"
+local BAD_ON = "|cffff991a"					-- Will be overridden on load
+local BAD_OFF = "|r"
+
 BADAPPLES_TEXT = {
 	BADAPPLES_TAB_LONGNAME = "Badapples",
 	BADAPPLES_TAB_SHORTNAME = "Bad",
