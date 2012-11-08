@@ -1,0 +1,10 @@
+## Interface: 40100
+## Version: 4.0.6.1
+
+## Title: Badapples Fix
+## Notes: Fixes Cirk's Badapples for WoW Patch 3.3.5 and higher.
+## Author: Phanx
+
+## Dependencies: Badapples
+
+BadapplesFix.lua

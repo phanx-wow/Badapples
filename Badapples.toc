@@ -1,0 +1,13 @@
+## Interface: 30200
+## Version: 3.2.0
+## Title: Badapples |cff00ddbaMOD|r
+## Notes: Allows for you to store the names of players you don't want to ever group with
+## Author: Cirk
+## X-Website: http://www.wowinterface.com/downloads/info4538-Badapples.html
+## SavedVariables: BadapplesState
+
+# Badapples2.lua
+
+Badapples.xml
+Badapples.lua
+BadapplesFix\BadapplesFix.lua
