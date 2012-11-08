@@ -15,4 +15,4 @@
 Localization.lua
 Badapples.xml
 Badapples.lua
-BadapplesFix.lua		# lazy!
+BadapplesFix.lua
