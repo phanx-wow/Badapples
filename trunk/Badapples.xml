@@ -1,0 +1,853 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+	<Script file="Badapples.lua"/>
+	<Button name="BadapplesFrameColumnHeaderTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="10" y="22"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentLeft" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="5" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0" right="0.078125" top="0" bottom="0.75"/>
+				</Texture>
+				<Texture name="$parentMiddle" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="53" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.078125" right="0.90625" top="0" bottom="0.75"/>
+				</Texture>
+				<Texture name="$parentRight" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="4" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.90625" right="0.96875" top="0" bottom="0.75"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<ButtonText name="$parentText">
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="8" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontHighlightSmall"/>
+	</Button>
+	<Button name="BadapplesFrameButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="298" y="16"/>
+		</Size>
+		<Layers>
+			<Layer level="BORDER">
+				<FontString name="$parentName" inherits="GameFontNormalSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="84" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-3"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentReason" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="200" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentName" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEnter>
+				self.hasCursor = true;
+				self:OnEnterFunction();
+			</OnEnter>
+			<OnLeave>
+				if (GameTooltip:IsOwned(self)) then
+					GameTooltip:Hide();
+				end
+				self.hasCursor = nil;
+			</OnLeave>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+				self.OnEnterFunction = function(self)
+					local reason = getglobal(self:GetName().."Reason");
+					if (reason:GetStringWidth()/reason:GetWidth() >= 0.95) then
+						GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+						GameTooltip:SetText(reason:GetText(), 1, 1, 1, nil, 1);
+					elseif (GameTooltip:IsOwned(self)) then
+						GameTooltip:Hide();
+					end
+				end
+			</OnLoad>
+			<OnClick>
+				Badapples.FrameButton_OnClick(self, arg1);
+				PlaySound("igMainMenuOptionCheckBoxOn");
+			</OnClick>
+		</Scripts>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD">
+			<Size>
+				<AbsDimension x="298" y="16"/>
+			</Size>
+			<Anchors>
+				<Anchor point="TOP">
+					<Offset>
+						<AbsDimension x="5" y="-2"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+	<Button name="BadapplesSideTabTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="32" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\SpellBook\SpellBook-SkillLineTab">
+					<Size>
+						<AbsDimension x="64" y="64"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="-3" y="11"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				-- Put the button just behind the frame
+				self:SetFrameLevel(self:GetFrameLevel() - 1);
+				BadapplesTab_OnLoad(self);
+			</OnLoad>
+			<OnEvent>
+				FriendsFrame_Update();
+			</OnEvent>
+			<OnClick>
+				PanelTemplates_Tab_OnClick(self, FriendsFrame);
+				FriendsFrame_OnShow();
+			</OnClick>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+		<ButtonText name="$parentText">
+			<Anchors>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontNormalSmall"/>
+		<HighlightFont style="GameFontHighlightSmall"/>
+		<DisabledFont style="GameFontHighlightSmall"/>
+		<HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+	</Button>
+	<Button name="BadapplesTabButtonTemplate" virtual="true">
+		<!-- Create our own tab button template to crop off bottom portion -->
+		<Size>
+            <AbsDimension x="115" y="32"/>
+        </Size>
+        <Layers>
+        	<Layer level="BACKGROUND">
+        		<Texture name="$parentLeftDisabled" file="Interface\HelpFrame\HelpFrameTab-Active">
+        			<Size>
+        				<AbsDimension x="16" y="28"/>
+        			</Size>
+        			<Anchors>
+        				<Anchor point="BOTTOMLEFT">
+        				</Anchor>
+        			</Anchors>
+					<TexCoords left="0" right="0.25" top="0" bottom="0.875"/>
+        		</Texture>
+				<Texture name="$parentMiddleDisabled" file="Interface\HelpFrame\HelpFrameTab-Active">
+        			<Size>
+        				<AbsDimension x="32" y="28"/>
+        			</Size>
+        			<Anchors>
+        				<Anchor point="LEFT" relativeTo="$parentLeftDisabled" relativePoint="RIGHT"/>
+        			</Anchors>
+					<TexCoords left="0.25" right="0.75" top="0" bottom="0.875"/>
+        		</Texture>
+				<Texture name="$parentRightDisabled" file="Interface\HelpFrame\HelpFrameTab-Active">
+        			<Size>
+        				<AbsDimension x="16" y="28"/>
+        			</Size>
+        			<Anchors>
+        				<Anchor point="LEFT" relativeTo="$parentMiddleDisabled" relativePoint="RIGHT"/>
+        			</Anchors>
+					<TexCoords left="0.75" right="1.0" top="0" bottom="0.875"/>
+        		</Texture>
+				<Texture name="$parentLeft" file="Interface\HelpFrame\HelpFrameTab-Inactive">
+        			<Size>
+        				<AbsDimension x="16" y="28"/>
+        			</Size>
+        			<Anchors>
+        				<Anchor point="BOTTOMLEFT"/>
+        			</Anchors>
+					<TexCoords left="0" right="0.25" top="0" bottom="0.875"/>
+        		</Texture>
+				<Texture name="$parentMiddle" file="Interface\HelpFrame\HelpFrameTab-Inactive">
+        			<Size>
+        				<AbsDimension x="32" y="28"/>
+        			</Size>
+        			<Anchors>
+        				<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+        			</Anchors>
+					<TexCoords left="0.25" right="0.75" top="0" bottom="0.875"/>
+        		</Texture>
+				<Texture name="$parentRight" file="Interface\HelpFrame\HelpFrameTab-Inactive">
+        			<Size>
+        				<AbsDimension x="16" y="28"/>
+        			</Size>
+        			<Anchors>
+        				<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
+        			</Anchors>
+					<TexCoords left="0.75" right="1.0" top="0" bottom="0.875"/>
+        		</Texture>
+        	</Layer>
+        </Layers>
+		<Scripts>
+			<OnLoad>
+				PanelTemplates_TabResize(self, 0);
+				getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+			</OnLoad>
+		</Scripts>
+		<ButtonText name="$parentText">
+			<Anchors>
+				<Anchor point="BOTTOM">
+					<Offset>
+						<AbsDimension x="0" y="5"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontNormalSmall"/>
+		<HighlightFont style="GameFontHighlightSmall"/>
+		<DisabledFont style="GameFontHighlightSmall"/>
+		<HighlightTexture name="$parentHighlightTexture" file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD">
+			<Size>
+				<AbsDimension x="5" y="32"/>
+			</Size>
+			<Anchors>
+				<Anchor point="BOTTOM">
+					<Offset>
+						<AbsDimension x="2" y="-8"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+    </Button>
+	<Frame name="BadapplesScriptFrame"> 
+		<Scripts> 
+			<OnLoad> 
+				Badapples.OnLoad(self)
+			</OnLoad>
+			<OnEvent>
+				Badapples.OnEvent(event, ...)
+			</OnEvent>
+		</Scripts>
+		<Frames>
+			<Button name="BadapplesFriendsFrameTab6" inherits="FriendsFrameTabTemplate" id="17" text="Bad" parent="FriendsFrame" hidden="true">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="FriendsFrameTab5" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-14" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						BadapplesTab_OnLoad(self);
+						self:SetFrameLevel(self:GetFrameLevel() + 4);
+					</OnLoad>
+					<OnEvent>
+						FriendsFrame_Update();
+					</OnEvent>
+					<OnClick>
+						PanelTemplates_Tab_OnClick(self, FriendsFrame);
+						FriendsFrame_OnShow();
+					</OnClick>
+					<OnEnter>
+						GameTooltip_AddNewbieTip(self, "Badapples", 1.0, 1.0, 1.0, "View or modify your Badapples list", 1);
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+				</Scripts>
+			</Button>
+			<Button name="BadapplesFriendsFrameSideTab1" inherits="BadapplesSideTabTemplate" id="17" parent="FriendsFrame"  text="Bad" hidden="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FriendsFrame" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-34" y="-78"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnEnter>
+						GameTooltip_AddNewbieTip(self, "Badapples", 1.0, 1.0, 1.0, "View or modify your Badapples list");
+					</OnEnter>
+				</Scripts>
+				<NormalTexture file="Interface\Icons\INV_Misc_Food_20"/>
+			</Button>
+			<Button name="BadapplesFriendsFrameToggleTab4" inherits="TabButtonTemplate" text="Bad" id="4" parent="FriendsListFrame">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="FriendsFrameToggleTab3" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						BadapplesTab_OnLoad(self);
+						PanelTemplates_TabResize(self, 0);
+						getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+					</OnLoad>
+					<OnShow>
+						PanelTemplates_DeselectTab(self);
+					</OnShow>
+					<OnClick>
+						FriendsFrame.showFriendsList = nil;
+						FriendsFrame.showMutedList = nil;
+						FriendsFrame.showBadapplesList = 1;
+						FriendsFrame_Update();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="BadapplesIgnoreFrameToggleTab4" inherits="TabButtonTemplate" text="Bad" id="4" parent="IgnoreListFrame">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="IgnoreFrameToggleTab3" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						BadapplesTab_OnLoad(self);
+						PanelTemplates_TabResize(self, 0);
+						getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+					</OnLoad>
+					<OnShow>
+						PanelTemplates_DeselectTab(self);
+					</OnShow>
+					<OnClick>
+						FriendsFrame.showFriendsList = nil;
+						FriendsFrame.showMutedList = nil;
+						FriendsFrame.showBadapplesList = 1;
+						FriendsFrame_Update();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="BadapplesMutedFrameToggleTab4" inherits="TabButtonTemplate" text="Bad" id="4" parent="MutedListFrame">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="MutedFrameToggleTab3" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						BadapplesTab_OnLoad(self);
+						PanelTemplates_TabResize(self, 0);
+						getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+					</OnLoad>
+					<OnShow>
+						PanelTemplates_DeselectTab(self);
+					</OnShow>
+					<OnClick>
+						FriendsFrame.showFriendsList = nil;
+						FriendsFrame.showMutedList = nil;
+						FriendsFrame.showBadapplesList = 1;
+						FriendsFrame_Update();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="BadapplesFrame" setAllPoints="true" hidden="true" parent="FriendsFrame">
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="BadapplesFrameTotals" inherits="GameFontNormalSmall">
+							<Size>
+								<AbsDimension x="298" y="16"/>
+							</Size>
+							<Anchors>
+								<Anchor point="BOTTOM">
+									<Offset>
+										<AbsDimension x="-10" y="127"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Button name="BadapplesFrameToggleTab1" inherits="TabButtonTemplate" text="FRIENDS" id="1">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="FriendsFrame">
+								<Offset>
+									<AbsDimension x="70" y="-39"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								PanelTemplates_TabResize(self, 0);
+								getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+							</OnLoad>
+							<OnShow>
+								PanelTemplates_DeselectTab(self);
+							</OnShow>
+							<OnClick>
+								FriendsFrame.showFriendsList = 1;
+								FriendsFrame.showMutedList = nil;
+								FriendsFrame.showBadapplesList = nil;
+								FriendsFrame_Update();
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameToggleTab2" inherits="TabButtonTemplate" text="IGNORE" id="2">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="BadapplesFrameToggleTab1" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								PanelTemplates_TabResize(self, 0);
+								getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+							</OnLoad>
+							<OnShow>
+								PanelTemplates_DeselectTab(self);
+							</OnShow>
+							<OnClick>
+								FriendsFrame.showFriendsList = nil;
+								FriendsFrame.showMutedList = nil;
+								FriendsFrame.showBadapplesList = nil;
+								FriendsFrame_Update();
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameToggleTab3" inherits="TabButtonTemplate" text="MUTED" id="3">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="BadapplesFrameToggleTab2" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								PanelTemplates_TabResize(self, 0);
+								getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+							</OnLoad>
+							<OnShow>
+								PanelTemplates_DeselectTab(self);
+							</OnShow>
+							<OnClick>
+								FriendsFrame.showFriendsList = nil;
+								FriendsFrame.showMutedList = 1;
+								FriendsFrame.showBadapplesList = nil;
+								FriendsFrame_Update();
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameToggleTab4" inherits="BadapplesTabButtonTemplate" text="Bad" id="4">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="BadapplesFrameToggleTab3" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								BadapplesTab_OnLoad(self);
+								PanelTemplates_SelectTab(self);
+								PanelTemplates_TabResize(self, 0);
+								getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
+							</OnLoad>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameNameColumnHeader" inherits="BadapplesFrameColumnHeaderTemplate" text="Name">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="20" y="-72"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(self, 83);
+							</OnLoad>
+							<OnClick>
+								PlaySound("igMainMenuOptionCheckBoxOn");
+								Badapples.Frame_ToggleSortBy(BADAPPLES_TEXT.SORTBY_NAME);
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameReasonColumnHeader" inherits="BadapplesFrameColumnHeaderTemplate" text="Reason">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="BadapplesFrameNameColumnHeader" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(self, 240);
+							</OnLoad>
+							<OnClick>
+								PlaySound("igMainMenuOptionCheckBoxOn");
+								Badapples.Frame_ToggleSortBy(BADAPPLES_TEXT.SORTBY_REASON);
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameRemoveButton" inherits="UIPanelButtonTemplate" text="Remove">
+						<Size>
+							<AbsDimension x="120" y="22"/>
+						</Size>
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT">
+								<Offset>
+									<AbsDimension x="-40" y="82"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								Badapples.Frame_Remove();
+							</OnClick>
+							<OnEnter>
+								GameTooltip_AddNewbieTip(self, "Remove player", 1.0, 1.0, 1.0, "Removes the selected player from your Badapples list", 1);
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide();
+							</OnLeave>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameAddButton" inherits="UIPanelButtonTemplate" text="Add">
+						<Size>
+							<AbsDimension x="120" y="22"/>
+						</Size>
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="BadapplesFrameRemoveButton" relativePoint="LEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								Badapples.Frame_Add();
+							</OnClick>
+							<OnEnter>
+								GameTooltip_AddNewbieTip(self, "Add player", 1.0, 1.0, 1.0, "Adds a player to your Badapples list", 1);
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide();
+							</OnLeave>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameColorButton" inherits="UIPanelButtonTemplate" text="Set Color">
+						<Size>
+							<AbsDimension x="85" y="22"/>
+						</Size>
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="BadapplesFrameAddButton" relativePoint="LEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								Badapples.ShowColorPicker();
+							</OnClick>
+							<OnEnter>
+								GameTooltip_AddNewbieTip(self, "Set color", 1.0, 1.0, 1.0, "Allows you to change the color that is used to highlight Badapple players in chat, target, and tooltip", 1);
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide();
+							</OnLeave>
+						</Scripts>
+					</Button>
+					<Button name="BadapplesFrameButton1" inherits="BadapplesFrameButtonTemplate" id="1">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrame">
+								<Offset>
+									<AbsDimension x="15" y="-95"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton2" inherits="BadapplesFrameButtonTemplate" id="2">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton1" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton3" inherits="BadapplesFrameButtonTemplate" id="3">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton2" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton4" inherits="BadapplesFrameButtonTemplate" id="4">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton3" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton5" inherits="BadapplesFrameButtonTemplate" id="5">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton4" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton6" inherits="BadapplesFrameButtonTemplate" id="6">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton5" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton7" inherits="BadapplesFrameButtonTemplate" id="7">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton6" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton8" inherits="BadapplesFrameButtonTemplate" id="8">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton7" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton9" inherits="BadapplesFrameButtonTemplate" id="9">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton8" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton10" inherits="BadapplesFrameButtonTemplate" id="10">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton9" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton11" inherits="BadapplesFrameButtonTemplate" id="11">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton10" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton12" inherits="BadapplesFrameButtonTemplate" id="12">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton11" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton13" inherits="BadapplesFrameButtonTemplate" id="13">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton12" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton14" inherits="BadapplesFrameButtonTemplate" id="14">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton13" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton15" inherits="BadapplesFrameButtonTemplate" id="15">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton14" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton16" inherits="BadapplesFrameButtonTemplate" id="16">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton15" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="BadapplesFrameButton17" inherits="BadapplesFrameButtonTemplate" id="17">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="BadapplesFrameButton16" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<EditBox name="BadapplesFrameEditBox" autoFocus="false" frameStrata="HIGH">
+						<Size>
+							<AbsDimension x="316" y="32"/>
+						</Size>
+						<Anchors>
+							<Anchor point="BOTTOM">
+								<Offset>
+									<AbsDimension x="-10" y="100"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnShow>
+								self:ClearFocus();
+							</OnShow>
+							<OnEnterPressed>
+								Badapples.Frame_EditReason();
+							</OnEnterPressed>
+							<OnEscapePressed>
+								self:ClearFocus();
+							</OnEscapePressed>
+							<OnTextChanged>
+								if (self.newText) then
+									self:SetText(self.newText);
+									self.newText = nil;
+								end
+							</OnTextChanged>
+						</Scripts>
+						<FontString font="Fonts\ARIALN.TTF">
+							<FontHeight>
+								<AbsValue val="12"/>
+							</FontHeight>
+							<Color r="1.0" g="1.0" b="1.0"/>
+						</FontString>
+					</EditBox>
+					<ScrollFrame name="BadapplesListScrollFrame" inherits="FauxScrollFrameTemplate" hidden="true">
+						<Size>
+							<AbsDimension x="296" y="283"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeTo="FriendsFrame" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="-66" y="-100"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnVerticalScroll>
+								FauxScrollFrame_OnVerticalScroll(self, offset, BADAPPLES_FRAME_SCROLL_HEIGHT, Badapples.Frame_ListUpdate);
+							</OnVerticalScroll>
+						</Scripts>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture name="BadapplesListScrollBarTop" file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+									<Size>
+										<AbsDimension x="31" y="256"/>
+									</Size>
+									<Anchors>
+										<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+											<Offset>
+												<AbsDimension x="-2" y="5"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<TexCoords left="0" right="0.484375" top="0" bottom="1.0"/>
+								</Texture>
+								<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+									<Size>
+										<AbsDimension x="31" y="106"/>
+									</Size>
+									<Anchors>
+										<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+											<Offset>
+												<AbsDimension x="-2" y="-2"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<TexCoords left="0.515625" right="1.0" top="0" bottom="0.4140625"/>
+								</Texture>
+							</Layer>
+						</Layers>
+					</ScrollFrame>
+					<Frame name="BadapplesDropDown" inherits="UIDropDownMenuTemplate"/>
+				</Frames>
+				<Scripts>
+					<OnShow>
+						Badapples.Frame_ListUpdate();
+					</OnShow>
+				</Scripts>
+			</Frame>
+		</Frames>
+	</Frame>
+</Ui>
