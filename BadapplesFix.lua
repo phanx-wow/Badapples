@@ -5,12 +5,6 @@
 	tooltips to each entry in the Badapples list panel.
 ----------------------------------------------------------------------]]
 
-if not BADAPPLES_VERSION or tonumber(BADAPPLES_VERSION:match("(%d+%.%d+)%.")) > 3.2 then
-	return print("Badapples has been updated. You probably don't need Badapples Fix anymore.")
-end
-
-------------------------------------------------------------------------
-
 local VERTICAL_OFFSET = 19
 
 BadapplesFrameNameColumnHeader:SetPoint("TOPLEFT", FriendsFrame, 6, -84)
@@ -40,27 +34,31 @@ for i = 1, 4 do
 	tab.Show = tab.Hide
 end
 
-local o = CreateFrame("Frame", "otest", UIParent)
-o:SetFrameStrata("DIALOG")
-o:SetBackdrop({ bgFile = [[Interface\BUTTONS\WHITE8X8]] })
-o:SetBackdropColor(1, 0, 1, 0.25)
-
 ------------------------------------------------------------------------
 
-local FriendsTabHeaderTab4 = CreateFrame("Button", "FriendsTabHeaderTab4", FriendsTabHeader, "TabButtonTemplate")
+local tabID = 1
+while true do
+	if _G["FriendsTabHeaderTab"..tabID] then
+		tabID = tabID + 1
+	else
+		break
+	end
+end
 
-FriendsTabHeaderTab4:SetPoint("LEFT", FriendsTabHeaderTab3:IsShown() and FriendsTabHeaderTab3 or FriendsTabHeaderTab2, "RIGHT", 0, 0)
-FriendsTabHeaderTab4:SetText("Badapples")
-FriendsTabHeaderTab4:SetID(4)
+local tab = CreateFrame("Button", "FriendsTabHeaderTab"..tabID, FriendsTabHeader, "TabButtonTemplate")
 
-FriendsTabHeaderTab4:SetScript("OnClick", function(self)
+tab:SetPoint("LEFT", _G["FriendsTabHeaderTab"..(tabID-1)]:IsShown() and _G["FriendsTabHeaderTab"..(tabID-1)] or _G["FriendsTabHeaderTab"..(tabID-2)], "RIGHT", 0, 0)
+tab:SetText("Badapples")
+tab:SetID(4)
+
+tab:SetScript("OnClick", function(self)
 	PanelTemplates_Tab_OnClick(self, FriendsTabHeader)
 	FriendsFrame_Update()
 	PlaySound("igMainMenuOptionCheckBoxOn")
 end)
 
-PanelTemplates_TabResize(FriendsTabHeaderTab4, 0)
-FriendsTabHeaderTab4:SetWidth(FriendsTabHeaderTab4:GetTextWidth() + 31)
+PanelTemplates_TabResize(tab, 0)
+tab:SetWidth(tab:GetTextWidth() + 31)
 
 PanelTemplates_SetNumTabs(FriendsTabHeader, 4)
 PanelTemplates_SetTab(FriendsTabHeader, 1)

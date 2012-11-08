@@ -1,13 +1,18 @@
-## Interface: 30200
-## Version: 3.2.0
-## Title: Badapples |cff00ddbaMOD|r
+## Interface: 50001
+## Version: 5.0.5.wowi:revision
+
+## Title: Badapples
 ## Notes: Allows for you to store the names of players you don't want to ever group with
 ## Author: Cirk
+## X-CompatibleLocales: deDE, enUS, esES, esMX, frFR, itIT, ptBR, koKR, ruRU, zhCN, zhTW
+## X-Localizations: enUS
 ## X-Website: http://www.wowinterface.com/downloads/info4538-Badapples.html
+## X-Curse-Project-ID: badapples
+## X-WoWI-ID: 4538
+
 ## SavedVariables: BadapplesState
 
-# Badapples2.lua
-
+Localization.lua
 Badapples.xml
 Badapples.lua
-BadapplesFix\BadapplesFix.lua
+BadapplesFix.lua		# lazy!
