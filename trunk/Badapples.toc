@@ -1,8 +1,9 @@
-## Interface: 50100
-## Version: 5.1.0.wowi:revision
+## Interface: 50200
+## Version: 5.2.0.wowi:revision
 
 ## Title: Badapples
-## Notes: Allows for you to store the names of players you don't want to ever group with
+## Notes: Allows for you to store the names of players you don't want to ever group with.
+
 ## Author: Cirk
 ## X-CompatibleLocales: deDE, enUS, esES, esMX, frFR, itIT, ptBR, koKR, ruRU, zhCN, zhTW
 ## X-Localizations: enUS
