@@ -31,24 +31,25 @@ BadapplesFrameAddButton:SetPoint("LEFT", BadapplesFrameColorButton, "RIGHT", 0, 
 
 BadapplesFrameRemoveButton:ClearAllPoints()
 BadapplesFrameRemoveButton:SetPoint("LEFT", BadapplesFrameAddButton, "RIGHT", 0, 0)
-
+--[[
 for i = 1, 4 do
 	local tab = _G["BadapplesFrameToggleTab"..i]
 	tab:Hide()
 	tab.Show = tab.Hide
 end
-
+]]
 ------------------------------------------------------------------------
 
 local tabID = 1
 while _G["FriendsTabHeaderTab"..tabID] do
 	tabID = tabID + 1
 end
+BADAPPLES_TAB_ID = tabID
 
 local tab = CreateFrame("Button", "FriendsTabHeaderTab"..tabID, FriendsTabHeader, "TabButtonTemplate")
 
 tab:SetPoint("LEFT", _G["FriendsTabHeaderTab"..(tabID-1)]:IsShown() and _G["FriendsTabHeaderTab"..(tabID-1)] or _G["FriendsTabHeaderTab"..(tabID-2)], "RIGHT", 0, 0)
-tab:SetText("Badapples")
+tab:SetText(id == 5 and BADAPPLES_TEXT.TAB_SHORTNAME or BADAPPLES_TEXT.TAB_LONGNAME)
 tab:SetID(tabID)
 
 tab:SetScript("OnClick", function(self)
@@ -68,11 +69,11 @@ PanelTemplates_SetTab(FriendsTabHeader, 1)
 local hook_FriendsFrame_Update = FriendsFrame_Update
 
 function FriendsFrame_Update()
-	if FriendsFrame.selectedTab ~= 1 or FriendsTabHeader.selectedTab ~= 4 then
+	if FriendsFrame.selectedTab ~= 1 or FriendsTabHeader.selectedTab ~= tabID then
 		return hook_FriendsFrame_Update()
 	end
 
-	FriendsFrameTitleText:SetText("Badapples List")
+	FriendsFrameTitleText:SetText(BADAPPLES_TEXT.TITLETEXT)
 	FriendsFrame_ShowSubFrame("BadapplesFrame")
 
 	FriendsTabHeader:Show() -- not sure why it sometimes hides itself
@@ -123,11 +124,11 @@ local BadapplesButton_OnEnter = function(self)
 	local date = Badapples.GetDateAdded(name)
 	local source = Badapples.GetSource(name)
 	if date and source then
-		GameTooltip:AddLine("Added by " .. source .. " on " .. date, nil, nil, nil, 1, 1)
-	elseif date then
-		GameTooltip:AddLine("Added on " .. date, nil, nil, nil, 1, 1)
+		GameTooltip:AddLine(format(BADAPPLES_TEXT.ADDED_BY_ON, source, date), nil, nil, nil, 1, 1)
 	elseif source then
-		GameTooltip:AddLine("Added by " .. source, nil, nil, nil, 1, 1)
+		GameTooltip:AddLine(format(BADAPPLES_TEXT.ADDED_BY, source), nil, nil, nil, 1, 1)
+	elseif date then
+		GameTooltip:AddLine(format(BADAPPLES_TEXT.ADDED_ON, date), nil, nil, nil, 1, 1)
 	end
 
 	GameTooltip:Show()

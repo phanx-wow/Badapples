@@ -18,8 +18,28 @@ local BAD_ON = "|cffff991a"					-- Will be overridden on load
 local BAD_OFF = "|r"
 
 BADAPPLES_TEXT = {
-	BADAPPLES_TAB_LONGNAME = "Badapples",
-	BADAPPLES_TAB_SHORTNAME = "Bad",
+	TITLETEXT = "Badapples List",
+	TAB_TOOLTIP = "View or modify your Badapples list",
+
+	COLUMN_NAME = "Name",
+	COLUMN_REASON = "Reason",
+	ADDED_BY_ON = "Added by %s on %s",
+	ADDED_BY = "Added by %s",
+	ADDED_ON = "Added on %s",
+
+	BUTTON_ADD = "Add",
+	BUTTON_ADD_TITLE = "Add Player",
+	BUTTON_ADD_TOOLTIP = "Adds a player to your Badapples list.",
+	BUTTON_REMOVE = "Remove",
+	BUTTON_REMOVE_TITLE = "Remove Player",
+	BUTTON_REMOVE_TOOLTIP = "Removes the selected player from your Badapples list.",
+	BUTTON_SETCOLOR = "Set Color",
+	BUTTON_SETCOLOR_TITLE = "Set Color",
+	BUTTON_SETCOLOR_TOOLTIP = "Change the color that is used to highlight Badapple players in chat, target, and tooltip.",
+
+	TOTAL_EMPTY = "Badapples list is empty!",
+	TOTAL_SINGLE = "1 Badapple",
+	TOTAL_MULTIPLE = "%d Badapples",
 
 	COMMAND_HELP = "help",
 	COMMAND_LIST = "list",
@@ -36,19 +56,6 @@ BADAPPLES_TEXT = {
 	COMMAND_TOGGLETAB = "toggletab",
 	COMMAND_DEBUGON = "debugon",
 	COMMAND_DEBUGOFF = "debugoff",
-
-	MONTHNAME_01 = "Jan",
-	MONTHNAME_02 = "Feb",
-	MONTHNAME_03 = "Mar",
-	MONTHNAME_04 = "Apr",
-	MONTHNAME_05 = "May",
-	MONTHNAME_06 = "Jun",
-	MONTHNAME_07 = "Jul",
-	MONTHNAME_08 = "Aug",
-	MONTHNAME_09 = "Sep",
-	MONTHNAME_10 = "Oct",
-	MONTHNAME_11 = "Nov",
-	MONTHNAME_12 = "Dec",
 
 	ADD_CONFIRM = EM_ON.."Player "..EM_OFF.."%s"..EM_ON.." added to Badapples list: "..EM_OFF.."%s",
 	UPDATE_CONFIRM = EM_ON.."Player "..EM_OFF.."%s"..EM_ON.." reason updated: "..EM_OFF.."%s",
@@ -79,25 +86,43 @@ BADAPPLES_TEXT = {
 	PLAYER_ADD_CONFIRM_TEXT = "Add %s to your Badapples list?",
 	PLAYER_REMOVE_CONFIRM_TEXT = "Remove %s from your Badapples list?",
 	REMOVEALL_CONFIRM_TEXT = "This will remove all entries from your Badapples list, are you sure you want to proceed?",
+	TOGGLE_TAB = "Toggle",
 	DISABLE_TAB = "Disabled",
+	TAB_CONFIRM = EM_ON.."Badapples social tab is now %s"..EM_OFF,
+
+	DEBUGON_CONFIRM = "Badapples debug is enabled",
+	DEBUGOFF_CONFIRM = "Badapples debug is disabled",
+
+	TAB_LONGNAME = "Badapples",
+	TAB_SHORTNAME = "Bad",
+
+	MONTHNAME_01 = FULLDATE_MONTH_JANUARY,
+	MONTHNAME_02 = FULLDATE_MONTH_FEBRUARY,
+	MONTHNAME_03 = FULLDATE_MONTH_MARCH,
+	MONTHNAME_04 = FULLDATE_MONTH_APRIL,
+	MONTHNAME_05 = FULLDATE_MONTH_MAY,
+	MONTHNAME_06 = FULLDATE_MONTH_JUNE,
+	MONTHNAME_07 = FULLDATE_MONTH_JULY,
+	MONTHNAME_08 = FULLDATE_MONTH_AUGUST,
+	MONTHNAME_09 = FULLDATE_MONTH_SEPTEMBER,
+	MONTHNAME_10 = FULLDATE_MONTH_OCTOBER,
+	MONTHNAME_11 = FULLDATE_MONTH_NOVEMBER,
+	MONTHNAME_12 = FULLDATE_MONTH_DECEMBER,
+
 	ENABLE_FRIENDS_TAB = "FriendsEnabled",
 	ENABLE_BOTTOM_TAB = "BottomEnabled",
 	ENABLE_SIDE_TAB = "SideEnabled",
-	TOGGLE_TAB = "Toggle",
-	TAB_CONFIRM = EM_ON.."Badapples social tab is now %s"..EM_OFF,
 
 	SORTBY_NAME = "Name",
 	SORTBY_REASON = "Reason",
 	SORTBY_NAME_REVERSE = "Eman",
 	SORTBY_REASON_REVERSE = "Nosaer",
-
-	DEBUGON_CONFIRM = "Badapples debug is enabled",
-	DEBUGOFF_CONFIRM = "Badapples debug is disabled",
 }
 
 BADAPPLES_TEXT.REMOVEALL_WARNING = RED_ON.."WARNING: This will remove all entries from Badapples"..RED_OFF.."\n"..EM_ON.."Use "..EM_OFF.."/badapples "..BADAPPLES_TEXT.COMMAND_REMOVEALL.." "..BADAPPLES_TEXT.COMMAND_REMOVEALL_CONFIRM..EM_ON.." to proceed"..EM_OFF
 
 BADAPPLES_DESCRIPTION = "Allows you to add player names (and an optional reason) to a list of \"badapples\", or players for whom you want to be reminded of to avoid grouping with them."
+
 BADAPPLES_HELP = {
 	EM_ON.."/bad "..BADAPPLES_TEXT.COMMAND_HELP..EM_OFF.." shows this help message",
 	EM_ON.."/bad "..BADAPPLES_TEXT.COMMAND_LIST..EM_OFF.." shows the current list in your chat window (may be long)",

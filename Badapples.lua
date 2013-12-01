@@ -61,9 +61,9 @@ local BADAPPLES_RAID_CLEANUP_DELAY = 1
 local BADAPPLES_DEFAULT_HIGHLIGHT_R = 0.204
 local BADAPPLES_DEFAULT_HIGHLIGHT_G = 0.298
 local BADAPPLES_DEFAULT_HIGHLIGHT_B = 0.298
-local BADAPPLES_TAB_ID = 17
 local BADAPPLES_REWARN_DELAY = 10			-- Minimum warning interval for the same badapple
 
+BADAPPLES_TAB_ID = 17 -- Overwritten in BadapplesFix.lua
 
 ------------------------------------------------------------------------------
 -- Local variables
@@ -76,8 +76,6 @@ local _thisFrame = BadapplesScriptFrame						-- The frame pointer
 local _debugFrame = nil					-- ChatFrame that debug goes to, or nil if debug disabled
 local _serverName = nil					-- set to current realm when loaded
 local _playerName = nil					-- set to name of player when known
-local _tabNoBottomTab = nil				-- if bottom tab cannot be enabled due to another mod
-local _tabEnabled = nil					-- tab disabled or enabled status
 local _listCount = 0						-- current number of entries in list
 local _highlightColors = {}				-- RGB colors to use for highlighting Badapples
 local _partyMembers = {}					-- List of party members
@@ -89,7 +87,6 @@ local _listSorted = {}						-- Table of sorted indices by sort order
 local _ignoreList = {}						-- Populated with players on your ignore list
 local _lastBadappleWarning = nil			-- Text used in last badapple warning
 local _lastBadappleWarningExpires = nil	-- Time at which the last badapple warning expires
-local _voiceEnabledStatus = nil			-- Set to 0 or 1 first time it is needed, keeps track of current voice enabled state
 
 
 ------------------------------------------------------------------------------
@@ -133,16 +130,16 @@ local _badapplesAddPlayerPopup = {
 	hasEditBox = 1,
 	maxLetters = 12,
 	OnShow = function(self)
-		getglobal(self:GetName().."EditBox"):SetFocus()
+		_G[self:GetName().."EditBox"]:SetFocus()
 	end,
 	OnHide = function(self)
 		if (ChatFrame1EditBox:IsShown()) then
 			ChatFrame1EditBox:SetFocus()
 		end
-		getglobal(self:GetName().."EditBox"):SetText("")
+		_G[self:GetName().."EditBox"]:SetText("")
 	end,
 	OnAccept = function(self)
-		local editBox = getglobal(self:GetName().."EditBox")
+		local editBox = _G[self:GetName().."EditBox"]
 		Badapples.Frame_EditBoxAddName(editBox)
 	end,
 	EditBoxOnEnterPressed = function(self)
@@ -216,14 +213,23 @@ end
 function Badapples.FormatName(text)
 	-- Formats the indicated name as a player name (only first letter can be
 	-- uppercase).  Here we are careful to handle UTF-8 coding (which is what
-	-- WoW uses in 2.2) manually since string.sub doesn't do this itself.
-	local firstChar = string.sub(text, 1, 1)
-	local remain = string.sub(text, 2)
-	if (string.byte(firstChar) >= 192) then
-		firstChar = string.sub(text, 1, 2)
-		remain = string.sub(text, 3)
+	-- WoW uses in 2.2) manually since strsub doesn't do this itself.
+	local firstChar = strsub(text, 1, 1)
+	local remain = strsub(text, 2)
+
+	local firstByte = strbyte(firstChar)
+	if firstByte >= 192 and firstByte <= 223 then
+		firstChar = strsub(text, 1, 2)
+		remain = strsub(text, 3)
+	elseif firstByte >= 224 and firstByte <= 239 then
+		firstChar = strsub(text, 1, 3)
+		remain = strsub(text, 4)
+	elseif firstByte >= 240 and firstByte <= 244 then
+		firstChar = strsub(text, 1, 4)
+		remain = strsub(text, 5)
 	end
-	return string.upper(firstChar)..string.lower(remain)
+
+	return strupper(firstChar)..strlower(remain)
 end
 
 
@@ -267,7 +273,7 @@ function Badapples.NotifyPlayer(notifyText, name, reason, errorText, frame)
 	-- message in the current chat frame (notifyText) and/or in the UI error
 	-- frame (errorText).
 	if (notifyText) then
-		local text = string.format(RED_ON..notifyText..RED_OFF, BAD_ON..name..RED_ON, RED_OFF..(reason or ""))
+		local text = format(RED_ON..notifyText..RED_OFF, BAD_ON..name..RED_ON, RED_OFF..(reason or ""))
 		local time = GetTime()
 		if (not _lastBadappleWarningExpires or (time > _lastBadappleWarningExpires) or (text ~= _lastBadappleWarning) or frame) then
 			_lastBadappleWarning = text
@@ -276,7 +282,7 @@ function Badapples.NotifyPlayer(notifyText, name, reason, errorText, frame)
 				frame:AddMessage(text)
 			else
 				for i = 1, NUM_CHAT_WINDOWS do
-					local chatFrame = getglobal("ChatFrame"..i)
+					local chatFrame = _G["ChatFrame"..i]
 					if (chatFrame:IsShown()) then
 						chatFrame:AddMessage(text)
 						break
@@ -286,7 +292,7 @@ function Badapples.NotifyPlayer(notifyText, name, reason, errorText, frame)
 		end
 	end
 	if (errorText) then
-		local text = string.format(RED_ON..errorText..RED_OFF, name)
+		local text = format(RED_ON..errorText..RED_OFF, name)
 		UIErrorsFrame:AddMessage(text)
 	end
 end
@@ -346,33 +352,23 @@ function Badapples.SortList(sortBy)
 	-- the Badapples list in the appropriate sorted order
 	_listSorted = {}
 	for name in pairs(BadapplesState.Servers[_serverName].List) do
-		table.insert(_listSorted, name)
+		tinsert(_listSorted, name)
 	end
 	if (sortBy == BADAPPLES_TEXT.SORTBY_NAME) then
-		table.sort(_listSorted, Badapples.CompareOnNameAtoZ)
+		sort(_listSorted, Badapples.CompareOnNameAtoZ)
 		_listSortOrder = BADAPPLES_TEXT.SORTBY_NAME
 	elseif (sortBy == BADAPPLES_TEXT.SORTBY_NAME_REVERSE) then
-		table.sort(_listSorted, Badapples.CompareOnNameZtoA)
+		sort(_listSorted, Badapples.CompareOnNameZtoA)
 		_listSortOrder = BADAPPLES_TEXT.SORTBY_NAME_REVERSE
 	elseif (sortBy == BADAPPLES_TEXT.SORTBY_REASON) then
-		table.sort(_listSorted, Badapples.CompareOnReasonAtoZ)
+		sort(_listSorted, Badapples.CompareOnReasonAtoZ)
 		_listSortOrder = BADAPPLES_TEXT.SORTBY_REASON
 	elseif (sortBy == BADAPPLES_TEXT.SORTBY_REASON_REVERSE) then
-		table.sort(_listSorted, Badapples.CompareOnReasonZtoA)
+		sort(_listSorted, Badapples.CompareOnReasonZtoA)
 		_listSortOrder = BADAPPLES_TEXT.SORTBY_REASON_REVERSE
 	else
 		_listSortOrder = nil
 	end
-end
-
-
-function Badapples.CheckForOtherModTab()
-	-- Returns 1 if there is another mod already using a 6th social tab, or
-	-- nil otherwise
-	if (FriendsFrameTab6 or (FriendsFrame.numTabs == 6)) then
-		return 1
-	end
-	return nil
 end
 
 
@@ -394,8 +390,8 @@ function Badapples.GetDateAdded(name)
 		if (BadapplesState.Servers[_serverName].List[player].Date) then
 			for mm, dd, yy in string.gmatch(BadapplesState.Servers[_serverName].List[player].Date, "(%w+)/(%w+)/(%w+)") do
 				local month = BADAPPLES_TEXT["MONTHNAME_"..mm]
-				if (string.sub(dd, 1, 1) == "0") then
-					dd = string.sub(dd, 2)
+				if (strsub(dd, 1, 1) == "0") then
+					dd = strsub(dd, 2)
 				end
 				return dd.." "..month.." "..yy
 			end
@@ -424,7 +420,8 @@ function Badapples.List()
 		DEFAULT_CHAT_FRAME:AddMessage(EM_ON.."There are no players on the Badapples list"..EM_OFF)
 		return
 	end
-	for index, name in ipairs(_listSorted) do
+	for i = 1, #_listSorted do
+		local name = _listSorted[i]
 		local reason = BadapplesState.Servers[_serverName].List[name].Reason
 		if (not reason) then
 			reason = BADAPPLES_TEXT.NO_REASON
@@ -474,8 +471,8 @@ function Badapples.Add(name_and_reason)
 		DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.PLAYERNAME_ISSELF)
 		return nil
 	end
-	if (reason and (string.len(reason) > BADAPPLES_MAXIMUM_REASON_LENGTH)) then
-		reason = string.sub(reason, 1, BADAPPLES_MAXIMUM_REASON_LENGTH)
+	if (reason and (strlen(reason) > BADAPPLES_MAXIMUM_REASON_LENGTH)) then
+		reason = strsub(reason, 1, BADAPPLES_MAXIMUM_REASON_LENGTH)
 	end
 	if (BadapplesState.Servers[_serverName].List[player]) then
 		BadapplesState.Servers[_serverName].List[player].Reason = reason
@@ -673,11 +670,6 @@ function Badapples.HookNeededFunctions()
 	-- highlighting for Badapples
 	_original_GameTooltip_UnitColor = GameTooltip_UnitColor
 	GameTooltip_UnitColor = Badapples.GameTooltip_UnitColor
-
-	-- Post-hook PanelTemplates_UpdateTabs and so FriendsFrame_Update we can
-	-- handle selection of our tabs.
-	hooksecurefunc("PanelTemplates_UpdateTabs", Badapples.PanelTemplates_UpdateTabs)
-	hooksecurefunc("FriendsFrame_Update", Badapples.FriendsFrame_Update)
 end
 
 
@@ -726,18 +718,6 @@ function Badapples.VariablesLoaded()
 		if (_debugFrame) then
 			_debugFrame:AddMessage("Upgrading from Badapples version "..BadapplesState.Version)
 		end
-		if (BadapplesState.Version < "1.02") then
-			-- Reset default tab selection for each player
-			for server in pairs(BadapplesState.Servers) do
-				if (BadapplesState.Servers[server].Characters) then
-					for player in pairs(BadapplesState.Servers[server].Characters) do
-						if (BadapplesState.Servers[server].Characters[player].Tab ~= BADAPPLES_TEXT.DISABLE_TAB) then
-							BadapplesState.Servers[server].Characters[player].Tab = BADAPPLES_TEXT.ENABLE_FRIENDS_TAB
-						end
-					end
-				end
-			end
-		end
 		BadapplesState.Version = BADAPPLES_VERSION
 	end
 end
@@ -751,13 +731,6 @@ function Badapples.PlayerLogin()
 	if (not BadapplesState.Servers[_serverName].Characters[_playerName].Tab) then
 		BadapplesState.Servers[_serverName].Characters[_playerName].Tab = BADAPPLES_TEXT.ENABLE_FRIENDS_TAB
 	end
-	-- Get the value of _tabNoBottomTab and then set the tab status
-	-- according to the player's setting.  Note that if user selection is
-	-- the bottom tab and it cannot be used then the side tab will
-	-- automatically be selected instead but this is not updated in the
-	-- player's setup (unless they change it).
-	_tabNoBottomTab = Badapples.CheckForOtherModTab()
-	Badapples.Frame_SetTab(BadapplesState.Servers[_serverName].Characters[_playerName].Tab, 1)
 end
 
 
@@ -782,8 +755,8 @@ end
 function Badapples.SetItemRef(link, text, button)
 	-- Warn player if they try whispering a badapple, or if the shift key is
 	-- down and Badapple's player add box is open, then add them to it
-	if (string.sub(link, 1, 6) == "player" ) then
-		local name, lineid = strsplit(":", string.sub(link, 8))
+	if (strsub(link, 1, 6) == "player" ) then
+		local name, lineid = strsplit(":", strsub(link, 8))
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
 			if (BadapplesState.Servers[_serverName].List[name]) then
@@ -796,7 +769,7 @@ function Badapples.SetItemRef(link, text, button)
 				-- Add it to the "add" dialog if it is visible
 				local staticPopup = StaticPopup_Visible("BADAPPLE_ADD")
 				if (staticPopup) then
-					getglobal(staticPopup.."EditBox"):SetText(name)
+					_G[staticPopup.."EditBox"]:SetText(name)
 				end
 			end
 		end
@@ -820,21 +793,21 @@ function Badapples.StaticPopup_Show(popupName, text_arg1, text_arg2, data)
 				-- Warn user about this badapple
 				Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or BADAPPLES_TEXT.NO_REASON)
 				-- Use our replacement PARTY_INVITE dialog in badapple mode
-				replaceText = string.format(BADAPPLES_TEXT.PARTY_INVITE_TEXT, BAD_ON..name..BAD_OFF)
+				replaceText = format(BADAPPLES_TEXT.PARTY_INVITE_TEXT, BAD_ON..name..BAD_OFF)
 			elseif (_ignoreList[name]) then
 				-- Warn user about this ignored player
 				Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_IGNORE, name)
 				-- Use our replacement PARTY_INVITE dialog in ignore mode
-				replaceText = string.format(BADAPPLES_TEXT.PARTY_IGNORE_INVITE_TEXT, name)
+				replaceText = format(BADAPPLES_TEXT.PARTY_IGNORE_INVITE_TEXT, name)
 			end
 			if (replaceText) then
 				-- Find the dialog being used and change its text and accept buttons
 				for index = 1, STATICPOPUP_NUMDIALOGS, 1 do
-					local frame = getglobal("StaticPopup"..index)
+					local frame = _G["StaticPopup"..index]
 					if (frame:IsShown() and (frame.which == popupName)) then
-						local text = getglobal(frame:GetName().."Text")
-						local button1 = getglobal(frame:GetName().."Button1")
-						local alertIcon = getglobal(frame:GetName().."AlertIcon")
+						local text = _G[frame:GetName().."Text"]
+						local button1 = _G[frame:GetName().."Button1"]
+						local alertIcon = _G[frame:GetName().."AlertIcon"]
 						if (text and text:IsShown()) then
 							text:SetText(replaceText)
 						end
@@ -953,14 +926,14 @@ function Badapples.ChatEdit_UpdateHeader(editBox)
 	-- function checks to see if the editbox header was updated for a new tell
 	-- target and if this target is a player in our Badapples list then modify
 	-- the format string before calling the original update function.
-	local type = editBox:GetAttribute("chatType")
-	if (type == "WHISPER") then
+	local chatType = editBox:GetAttribute("chatType")
+	if (chatType == "WHISPER") then
 		local name = Badapples.FormatName(editBox:GetAttribute("tellTarget") or "")
 		if (BadapplesState.Servers[_serverName].List[name]) then
 			-- Update header color and warn user about this badapple
-			local header = getglobal(editBox:GetName().."Header")
+			local header = _G[editBox:GetName().."Header"]
 			if (header) then
-				header:SetText(string.format(CHAT_WHISPER_SEND, BAD_ON..name..BAD_OFF))
+				header:SetText(format(CHAT_WHISPER_SEND, BAD_ON..name..BAD_OFF))
 			end
 			Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or BADAPPLES_TEXT.NO_REASON)
 		elseif (_ignoreList[name]) then
@@ -991,12 +964,12 @@ function Badapples.Frame_ListUpdate()
 	-- Format string for the total players text
 	if (_listCount > 0) then
 		if (_listCount == 1) then
-			BadapplesFrameTotals:SetText("1 Badapple")
+			BadapplesFrameTotals:SetText(BADAPPLES_TEXT.TOTAL_SINGLE)
 		else
-			BadapplesFrameTotals:SetText(_listCount.." Badapples")
+			BadapplesFrameTotals:SetFormattedText(BADAPPLES_TEXT.TOTAL_MULTIPLE, _listCount)
 		end
 	else
-		BadapplesFrameTotals:SetText("Badapples list is empty!")
+		BadapplesFrameTotals:SetText(BADAPPLES_TEXT.TOTAL_EMPTY)
 	end
 
 	-- Now get parameters for what to display
@@ -1004,9 +977,9 @@ function Badapples.Frame_ListUpdate()
 	local name, reason
 	local nameText, reasonText
 	for i = 1, BADAPPLES_DISPLAY_COUNT do
-		button = getglobal("BadapplesFrameButton"..i)
-		nameText = getglobal("BadapplesFrameButton"..i.."Name")
-		reasonText = getglobal("BadapplesFrameButton"..i.."Reason")
+		button = _G["BadapplesFrameButton"..i]
+		nameText = _G["BadapplesFrameButton"..i.."Name"]
+		reasonText = _G["BadapplesFrameButton"..i.."Reason"]
 		index = i + offset
 		if (index <= _listCount) then
 			name = _listSorted[index]
@@ -1165,11 +1138,11 @@ end
 function Badapples.FrameButton_OnClick(self, button)
 	if (button == "LeftButton") then
 		HideDropDownMenu(1)
-		BadapplesFrame.SelectedName = getglobal("BadapplesFrameButton"..self:GetID()).Name
+		BadapplesFrame.SelectedName = _G["BadapplesFrameButton"..self:GetID()].Name
 		Badapples.Frame_ListUpdate()
 	else
 		HideDropDownMenu(1)
-		BadapplesFrame.SelectedName = getglobal("BadapplesFrameButton"..self:GetID()).Name
+		BadapplesFrame.SelectedName = _G["BadapplesFrameButton"..self:GetID()].Name
 		Badapples.Frame_ListUpdate()
 		BadapplesDropDown.name = BadapplesFrame.SelectedName
 		BadapplesDropDown.initialize = Badapples.Frame_DropdownInitialize
@@ -1249,244 +1222,17 @@ function Badapples.Frame_EditBoxAddName(editBox)
 end
 
 
-function Badapples.Frame_SetTab(action, silent)
-	-- Enables, disables, or toggles the Badapples social (FriendsFrame) tabs
-	if (action == BADAPPLES_TEXT.TOGGLE_TAB) then
-		-- Cycle through the tab states (friends, side, bottom)
-		if (_tabEnabled == BADAPPLES_TEXT.ENABLE_FRIENDS_TAB) then
-			action = BADAPPLES_TEXT.ENABLE_SIDE_TAB
-		elseif (_tabEnabled == BADAPPLES_TEXT.ENABLE_BOTTOM_TAB) then
-			action = BADAPPLES_TEXT.ENABLE_FRIENDS_TAB
-		elseif (_tabNoBottomTab) then
-			action = BADAPPLES_TEXT.ENABLE_FRIENDS_TAB
-		else
-			action = BADAPPLES_TEXT.ENABLE_BOTTOM_TAB
-		end
-	end
-	if ((action == BADAPPLES_TEXT.ENABLE_BOTTOM_TAB) and _tabNoBottomTab) then
-		action = BADAPPLES_TEXT.ENABLE_SIDE_TAB
-	end
-	if (action == BADAPPLES_TEXT.ENABLE_FRIENDS_TAB) then
-		if (_tabEnabled ~= action) then
-			_tabEnabled = action
-			BadapplesFriendsFrameSideTab1:Hide()
-			BadapplesFriendsFrameTab6:Hide()
-			BadapplesFriendsFrameToggleTab4:Show()
-			BadapplesIgnoreFrameToggleTab4:Show()
-			BadapplesMutedFrameToggleTab4:Show()
-			BadapplesFrameToggleTab1:Show()
-			BadapplesFrameToggleTab2:Show()
-			if (_voiceEnabledStatus == 1) then
-				BadapplesFrameToggleTab3:Show()
-			end
-			BadapplesFrameToggleTab4:Show()
-			if (FriendsFrame:IsShown()) then
-				if (BadapplesFrame:IsShown()) then
-					FriendsFrame.selectedTab = 1
-					FriendsFrame.showFriendsList = nil
-					FriendsFrame.showMutedList = nil
-					FriendsFrame.showBadapplesList = 1
-				end
-				PanelTemplates_UpdateTabs(FriendsFrame)
-				FriendsFrame_Update()
-			end
-			BadapplesState.Servers[_serverName].Characters[_playerName].Tab = action
-		end
-	elseif (action == BADAPPLES_TEXT.ENABLE_BOTTOM_TAB) then
-		if (_tabEnabled ~= action) then
-			_tabEnabled = action
-			BadapplesFriendsFrameSideTab1:Hide()
-			BadapplesFriendsFrameTab6:Show()
-			BadapplesFriendsFrameToggleTab4:Hide()
-			BadapplesIgnoreFrameToggleTab4:Hide()
-			BadapplesMutedFrameToggleTab4:Hide()
-			BadapplesFrameToggleTab1:Hide()
-			BadapplesFrameToggleTab2:Hide()
-			BadapplesFrameToggleTab3:Hide()
-			BadapplesFrameToggleTab4:Hide()
-			if (FriendsFrame:IsShown()) then
-				if (BadapplesFrame:IsShown()) then
-					FriendsFrame.selectedTab = BADAPPLES_TAB_ID
-				end
-				PanelTemplates_UpdateTabs(FriendsFrame)
-				FriendsFrame_Update()
-			end
-			BadapplesState.Servers[_serverName].Characters[_playerName].Tab = action
-		end
-	elseif (action == BADAPPLES_TEXT.ENABLE_SIDE_TAB) then
-		if (_tabEnabled ~= action) then
-			_tabEnabled = action
-			BadapplesFriendsFrameTab6:Hide()
-			BadapplesFriendsFrameSideTab1:Show()
-			BadapplesFriendsFrameToggleTab4:Hide()
-			BadapplesIgnoreFrameToggleTab4:Hide()
-			BadapplesMutedFrameToggleTab4:Hide()
-			BadapplesFrameToggleTab1:Hide()
-			BadapplesFrameToggleTab2:Hide()
-			BadapplesFrameToggleTab3:Hide()
-			BadapplesFrameToggleTab4:Hide()
-			if (FriendsFrame:IsShown()) then
-				if (BadapplesFrame:IsShown()) then
-					FriendsFrame.selectedTab = BADAPPLES_TAB_ID
-				end
-				PanelTemplates_UpdateTabs(FriendsFrame)
-				FriendsFrame_Update()
-			end
-			BadapplesState.Servers[_serverName].Characters[_playerName].Tab = action
-		end
-	elseif (action == BADAPPLES_TEXT.DISABLE_TAB) then
-		if (_tabEnabled ~= action) then
-			_tabEnabled = action
-			BadapplesFriendsFrameTab6:Hide()
-			BadapplesFriendsFrameSideTab1:Hide()
-			BadapplesFriendsFrameToggleTab4:Hide()
-			BadapplesIgnoreFrameToggleTab4:Hide()
-			BadapplesMutedFrameToggleTab4:Hide()
-			BadapplesFrameToggleTab1:Hide()
-			BadapplesFrameToggleTab2:Hide()
-			BadapplesFrameToggleTab3:Hide()
-			BadapplesFrameToggleTab4:Hide()
-			if (FriendsFrame:IsShown()) then
-				if (BadapplesFrame:IsShown()) then
-					FriendsFrame.selectedTab = BADAPPLES_TAB_ID
-				end
-				PanelTemplates_UpdateTabs(FriendsFrame)
-				FriendsFrame_Update()
-			end
-			BadapplesState.Servers[_serverName].Characters[_playerName].Tab = action
-		end
-	else
-		if (_debugFrame) then
-			_debugFrame:AddMessage("Unexpected action "..(action or "nil").." for Badapples.Frame_SetTab")
-		end
-		return
-	end
-	if (not silent) then
-		DEFAULT_CHAT_FRAME:AddMessage(format(BADAPPLES_TEXT.TAB_CONFIRM, action))
-	end
-end
-
-
 function Badapples.Show()
 	-- Forces the social window to show the Badapples list (if it isn't
 	-- already visible)
-	if (not BadapplesFrame:IsShown()) then
-		if (not FriendsFrame:IsShown()) then
+	if not BadapplesFrame:IsShown() then
+		if not FriendsFrame:IsShown() then
 			ShowUIPanel(FriendsFrame)
 		end
-		if (_tabEnabled == BADAPPLES_TEXT.ENABLE_FRIENDS_TAB) then
-			FriendsFrame.selectedTab = 1
-			FriendsFrame.showFriendsList = nil
-			FriendsFrame.showMutedList = nil
-			FriendsFrame.showBadapplesList = 1
-		else
-			FriendsFrame.selectedTab = BADAPPLES_TAB_ID
-		end
-		if (FriendsFrame:IsShown()) then
-			PanelTemplates_UpdateTabs(FriendsFrame)
+		FriendsFrame.selectedTab = 1 -- Friends
+		FriendsTabHeader.selectedTab = BADAPPLES_TAB_ID
+		if FriendsFrame:IsShown() then
 			FriendsFrame_Update()
-		end
-	end
-end
-
-
-------------------------------------------------------------------------------
--- Frame management hook functions
-------------------------------------------------------------------------------
-function Badapples.PanelTemplates_UpdateTabs(frame)
-	-- Post-hooked to handle our additional tab
-	if (frame == FriendsFrame) then
-		if (frame.selectedTab == BADAPPLES_TAB_ID) then
-			PanelTemplates_SelectTab(BadapplesFriendsFrameTab6)
-			BadapplesFriendsFrameSideTab1:Disable()
-			if (GameTooltip:IsOwned(BadapplesFriendsFrameSideTab1)) then
-				GameTooltip:Hide()
-			end
-		else
-			PanelTemplates_DeselectTab(BadapplesFriendsFrameTab6)
-			BadapplesFriendsFrameSideTab1:Enable()
-		end
-	end
-end
-
-
-function Badapples.FriendsFrame_Update()
-	-- This post-hooked function checks for the currently selected
-	-- FriendsFrame tab being the Badapples one, and handles that case.  It
-	-- also makes sure that the tabs are correctly sized and positioned.
-	if (_tabEnabled == BADAPPLES_TEXT.ENABLE_FRIENDS_TAB) then
-		local voiceEnabled = 0
-		if (IsVoiceChatEnabled()) then
-			voiceEnabled = 1
-		end
-		if (voiceEnabled ~= _voiceEnabledStatus) then
-			_voiceEnabledStatus = voiceEnabled
-			if (voiceEnabled == 1) then
-				-- Use short text name for Badapples tab, and align them on the right
-				-- of the third (muted) tab
-				BadapplesFriendsFrameToggleTab4:ClearAllPoints()
-				BadapplesFriendsFrameToggleTab4:SetPoint("LEFT", FriendsFrameToggleTab3, "RIGHT", 0, 0)
-				BadapplesFriendsFrameToggleTab4:SetText(BADAPPLES_TEXT.BADAPPLES_TAB_SHORTNAME)
-				PanelTemplates_TabResize(BadapplesFriendsFrameToggleTab4, 0)
-				BadapplesFriendsFrameToggleTab4HighlightTexture:SetWidth(BadapplesFriendsFrameToggleTab4:GetTextWidth() + 31)
-
-				BadapplesIgnoreFrameToggleTab4:ClearAllPoints()
-				BadapplesIgnoreFrameToggleTab4:SetPoint("LEFT", IgnoreFrameToggleTab3, "RIGHT", 0, 0)
-				BadapplesIgnoreFrameToggleTab4:SetText(BADAPPLES_TEXT.BADAPPLES_TAB_SHORTNAME)
-				PanelTemplates_TabResize(BadapplesIgnoreFrameToggleTab4, 0)
-				BadapplesIgnoreFrameToggleTab4HighlightTexture:SetWidth(BadapplesIgnoreFrameToggleTab4:GetTextWidth() + 31)
-
-				BadapplesFrameToggleTab4:ClearAllPoints()
-				BadapplesFrameToggleTab4:SetPoint("LEFT", BadapplesFrameToggleTab3, "RIGHT", 0, 0)
-				BadapplesFrameToggleTab4:SetText(BADAPPLES_TEXT.BADAPPLES_TAB_SHORTNAME)
-				PanelTemplates_TabResize(BadapplesFrameToggleTab4, 0)
-				BadapplesFrameToggleTab4HighlightTexture:SetWidth(BadapplesFrameToggleTab4:GetTextWidth() + 31)
-
-				BadapplesFrameToggleTab3:Enable()
-				BadapplesFrameToggleTab3:Show()
-			else
-				-- Use long text name for Badapples tab, and align them on the right
-				-- of the second (ignore) tab
-				BadapplesFriendsFrameToggleTab4:ClearAllPoints()
-				BadapplesFriendsFrameToggleTab4:SetPoint("LEFT", FriendsFrameToggleTab2, "RIGHT", 0, 0)
-				BadapplesFriendsFrameToggleTab4:SetText(BADAPPLES_TEXT.BADAPPLES_TAB_LONGNAME)
-				PanelTemplates_TabResize(BadapplesFriendsFrameToggleTab4, 0)
-				BadapplesFriendsFrameToggleTab4HighlightTexture:SetWidth(BadapplesFriendsFrameToggleTab4:GetTextWidth() + 31)
-
-				BadapplesIgnoreFrameToggleTab4:ClearAllPoints()
-				BadapplesIgnoreFrameToggleTab4:SetPoint("LEFT", IgnoreFrameToggleTab2, "RIGHT", 0, 0)
-				BadapplesIgnoreFrameToggleTab4:SetText(BADAPPLES_TEXT.BADAPPLES_TAB_LONGNAME)
-				PanelTemplates_TabResize(BadapplesIgnoreFrameToggleTab4, 0)
-				BadapplesIgnoreFrameToggleTab4HighlightTexture:SetWidth(BadapplesIgnoreFrameToggleTab4:GetTextWidth() + 31)
-
-				BadapplesFrameToggleTab4:ClearAllPoints()
-				BadapplesFrameToggleTab4:SetPoint("LEFT", BadapplesFrameToggleTab2, "RIGHT", 0, 0)
-				BadapplesFrameToggleTab4:SetText(BADAPPLES_TEXT.BADAPPLES_TAB_LONGNAME)
-				PanelTemplates_TabResize(BadapplesFrameToggleTab4, 0)
-				BadapplesFrameToggleTab4HighlightTexture:SetWidth(BadapplesFrameToggleTab4:GetTextWidth() + 31)
-
-				BadapplesFrameToggleTab3:Disable()
-				BadapplesFrameToggleTab3:Hide()
-			end
-		end
-	end
-	if (FriendsFrame.selectedTab == BADAPPLES_TAB_ID) then
-		FriendsFrameTopLeft:SetTexture("Interface\\ClassTrainerFrame\\UI-ClassTrainer-TopLeft")
-		FriendsFrameTopRight:SetTexture("Interface\\ClassTrainerFrame\\UI-ClassTrainer-TopRight")
-		FriendsFrameBottomLeft:SetTexture("Interface\\FriendsFrame\\WhoFrame-BotLeft")
-		FriendsFrameBottomRight:SetTexture("Interface\\FriendsFrame\\WhoFrame-BotRight")
-		FriendsFrameTitleText:SetText("Badapples List")
-		FriendsFrame_ShowSubFrame("BadapplesFrame")
-	elseif (FriendsFrame.selectedTab == 1) then
-		if (not FriendsFrame.showFriendsList and not FriendsFrame.showMutedList and FriendsFrame.showBadapplesList) then
-			FriendsFrameTopLeft:SetTexture("Interface\\ClassTrainerFrame\\UI-ClassTrainer-TopLeft")
-			FriendsFrameTopRight:SetTexture("Interface\\ClassTrainerFrame\\UI-ClassTrainer-TopRight")
-			FriendsFrameBottomLeft:SetTexture("Interface\\FriendsFrame\\WhoFrame-BotLeft")
-			FriendsFrameBottomRight:SetTexture("Interface\\FriendsFrame\\WhoFrame-BotRight")
-			FriendsFrameTitleText:SetText("Badapples List")
-			FriendsFrame_ShowSubFrame("BadapplesFrame")
-		else
-			FriendsFrame.showBadapplesList = nil
 		end
 	end
 end
@@ -1514,7 +1260,7 @@ function Badapples.OnLoad(self)
 
 	-- Add our Badapples frame to the FriendsFrame subframe list for if the
 	-- Badapples social tab is enabled.
-	table.insert(FRIENDSFRAME_SUBFRAMES, "BadapplesFrame")
+	tinsert(FRIENDSFRAME_SUBFRAMES, "BadapplesFrame")
 
 	-- Create a new BADAPPLE_INVITE popup for if we try and invite a Badapple
 	StaticPopupDialogs["BADAPPLE_INVITE"] = _badapplesInvitePopup
@@ -1540,7 +1286,7 @@ end
 function BadapplesTab_OnLoad(frame)
 	-- Called for each tab frame as they are loaded, this function sets the
 	-- tabs's appropriate text (long or short)
-	frame:SetText(BADAPPLES_TEXT.BADAPPLES_TAB_SHORTNAME)
+	frame:SetText(BADAPPLES_TEXT.TAB_SHORTNAME)
 end
 
 
@@ -1645,17 +1391,11 @@ function Badapples.SlashCommand(text)
 		elseif ((command == BADAPPLES_TEXT.COMMAND_COLOR) or (command == BADAPPLES_TEXT.COMMAND_SETCOLOR)) then
 			Badapples.ShowColorPicker()
 
-		elseif (command == BADAPPLES_TEXT.COMMAND_NOTAB) then
-			Badapples.Frame_SetTab(BADAPPLES_TEXT.DISABLE_TAB)
-
-		elseif (command == BADAPPLES_TEXT.COMMAND_TOGGLETAB) then
-			Badapples.Frame_SetTab(BADAPPLES_TEXT.TOGGLE_TAB)
-
 		elseif (command == BADAPPLES_TEXT.COMMAND_DEBUGON) then
 			_debugFrame = nil
 			local frameNum = tonumber(param or "")
 			if (frameNum and (frameNum >= 1) and (frameNum <= 7)) then
-				_debugFrame = getglobal("ChatFrame"..frameNum)
+				_debugFrame = _G["ChatFrame"..frameNum]
 			end
 			if (not _debugFrame) then
 				_debugFrame = DEFAULT_CHAT_FRAME
@@ -1669,8 +1409,8 @@ function Badapples.SlashCommand(text)
 		else
 			DEFAULT_CHAT_FRAME:AddMessage(EM_ON..BADAPPLES_NAME.." v"..BADAPPLES_VERSION..EM_OFF)
 			DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_DESCRIPTION)
-			for _, text in ipairs(BADAPPLES_HELP) do
-				DEFAULT_CHAT_FRAME:AddMessage(text)
+			for i = 1, #BADAPPLES_HELP do
+				DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_HELP[i])
 			end
 		end
 	end
@@ -1765,7 +1505,7 @@ function Badapples.RegisterOptions(name, titleText, descriptionText, helpText)
 			line:SetJustifyV("TOP")
 			line:SetNonSpaceWrap(1)
 			local uncolored = string.gsub(text, "(|c%x%x%x%x%x%x%x%x)", "")
-			if (string.sub(uncolored, 1, 1) == "/") then
+			if (strsub(uncolored, 1, 1) == "/") then
 				line:SetWordWrap(true)
 			else
 				line:SetWordWrap(false)
@@ -1783,4 +1523,3 @@ function Badapples.RegisterOptions(name, titleText, descriptionText, helpText)
 
 	InterfaceOptions_AddCategory(panel)
 end
-

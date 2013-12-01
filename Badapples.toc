@@ -14,8 +14,8 @@
 ## SavedVariables: BadapplesState
 
 Localization-en.lua
-# Localization-de.lua
-# Localization-es.lua
+Localization-de.lua
+Localization-es.lua
 
 Badapples.xml
 Badapples.lua
