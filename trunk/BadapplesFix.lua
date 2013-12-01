@@ -5,6 +5,10 @@
 	tooltips to each entry in the Badapples list panel.
 ----------------------------------------------------------------------]]
 
+setfenv(FriendsFrame_OnShow, setmetatable({ UpdateMicroButtons = function() end }, { __index = _G }))
+
+------------------------------------------------------------------------
+
 local VERTICAL_OFFSET = 19
 
 BadapplesFrameNameColumnHeader:SetPoint("TOPLEFT", FriendsFrame, 6, -84)
@@ -37,19 +41,15 @@ end
 ------------------------------------------------------------------------
 
 local tabID = 1
-while true do
-	if _G["FriendsTabHeaderTab"..tabID] then
-		tabID = tabID + 1
-	else
-		break
-	end
+while _G["FriendsTabHeaderTab"..tabID] do
+	tabID = tabID + 1
 end
 
 local tab = CreateFrame("Button", "FriendsTabHeaderTab"..tabID, FriendsTabHeader, "TabButtonTemplate")
 
 tab:SetPoint("LEFT", _G["FriendsTabHeaderTab"..(tabID-1)]:IsShown() and _G["FriendsTabHeaderTab"..(tabID-1)] or _G["FriendsTabHeaderTab"..(tabID-2)], "RIGHT", 0, 0)
 tab:SetText("Badapples")
-tab:SetID(4)
+tab:SetID(tabID)
 
 tab:SetScript("OnClick", function(self)
 	PanelTemplates_Tab_OnClick(self, FriendsTabHeader)
