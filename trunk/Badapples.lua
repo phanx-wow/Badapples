@@ -1229,7 +1229,10 @@ function Badapples.Show()
 		if not FriendsFrame:IsShown() then
 			ShowUIPanel(FriendsFrame)
 		end
-		FriendsFrame.selectedTab = 1 -- Friends
+
+		FriendsFrame.selectedTab = 1
+		PanelTemplates_UpdateTabs(FriendsFrame)
+
 		FriendsTabHeader.selectedTab = BADAPPLES_TAB_ID
 		if FriendsFrame:IsShown() then
 			FriendsFrame_Update()

@@ -61,7 +61,7 @@ end)
 PanelTemplates_TabResize(tab, 0)
 tab:SetWidth(tab:GetTextWidth() + 31)
 
-PanelTemplates_SetNumTabs(FriendsTabHeader, 4)
+PanelTemplates_SetNumTabs(FriendsTabHeader, tabID)
 PanelTemplates_SetTab(FriendsTabHeader, 1)
 
 ------------------------------------------------------------------------
