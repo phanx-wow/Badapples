@@ -5,7 +5,7 @@
 	tooltips to each entry in the Badapples list panel.
 ----------------------------------------------------------------------]]
 
-setfenv(FriendsFrame_OnShow, setmetatable({ UpdateMicroButtons = function() end }, { __index = _G }))
+--setfenv(FriendsFrame_OnShow, setmetatable({ UpdateMicroButtons = function() end }, { __index = _G }))
 
 ------------------------------------------------------------------------
 
