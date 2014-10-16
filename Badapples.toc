@@ -1,10 +1,10 @@
-## Interface: 50400
-## Version: 5.4.8.wowi:revision
+## Interface: 60000
+## Version: 6.0.4.wowi:revision
 
 ## Title: Badapples
 ## Notes: Allows for you to store the names of players you don't want to ever group with.
 
-## Author: Cirk
+## Author: Cirk, Phanx
 ## X-CompatibleLocales: enUS, deDE, esES, esMX, frFR, itIT, ptBR, koKR, ruRU, zhCN, zhTW
 ## X-Localizations: enUS, deDE, esES, esMX, ruRU
 ## X-Website: http://www.wowinterface.com/downloads/info4538-Badapples.html
