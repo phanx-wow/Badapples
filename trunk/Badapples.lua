@@ -41,6 +41,9 @@ BadapplesState = {}						-- Will be overridden when loaded
 BADAPPLES_FRAME_SCROLL_HEIGHT = 16
 BADAPPLES_DISPLAY_COUNT = 17
 
+local _, L = ...
+Badapples.L = L
+
 
 ------------------------------------------------------------------------------
 -- Text strings
@@ -110,7 +113,7 @@ local _chatEventList = {
 -- StaticPopup definitions
 ------------------------------------------------------------------------------
 local _badapplesInvitePopup = {
-	text = BADAPPLES_TEXT.INVITE_TEXT,
+	text = L.INVITE_TEXT,
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self, data)
@@ -124,7 +127,7 @@ local _badapplesInvitePopup = {
 }
 
 local _badapplesAddPlayerPopup = {
-	text = BADAPPLES_TEXT.PLAYER_ADD_TEXT,
+	text = L.PLAYER_ADD_TEXT,
 	button1 = ACCEPT,
 	button2 = CANCEL,
 	hasEditBox = 1,
@@ -155,7 +158,7 @@ local _badapplesAddPlayerPopup = {
 }
 
 local _badapplesConfirmAddPopup = {
-	text = BADAPPLES_TEXT.PLAYER_ADD_CONFIRM_TEXT,
+	text = L.PLAYER_ADD_CONFIRM_TEXT,
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self, data)
@@ -169,7 +172,7 @@ local _badapplesConfirmAddPopup = {
 }
 
 local _badapplesConfirmRemovePopup = {
-	text = BADAPPLES_TEXT.PLAYER_REMOVE_CONFIRM_TEXT,
+	text = L.PLAYER_REMOVE_CONFIRM_TEXT,
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self, data)
@@ -183,11 +186,11 @@ local _badapplesConfirmRemovePopup = {
 }
 
 local _badapplesConfirmRemoveAllPopup = {
-	text = BADAPPLES_TEXT.REMOVEALL_CONFIRM_TEXT,
+	text = L.REMOVEALL_CONFIRM_TEXT,
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self)
-		Badapples.RemoveAll(BADAPPLES_TEXT.COMMAND_REMOVEALL_CONFIRM)
+		Badapples.RemoveAll(L.COMMAND_REMOVEALL_CONFIRM)
 	end,
 	sound = "igCharacterInfoOpen",
 	timeout = 60,
@@ -354,18 +357,18 @@ function Badapples.SortList(sortBy)
 	for name in pairs(BadapplesState.Servers[_serverName].List) do
 		tinsert(_listSorted, name)
 	end
-	if (sortBy == BADAPPLES_TEXT.SORTBY_NAME) then
+	if (sortBy == L.SORTBY_NAME) then
 		sort(_listSorted, Badapples.CompareOnNameAtoZ)
-		_listSortOrder = BADAPPLES_TEXT.SORTBY_NAME
-	elseif (sortBy == BADAPPLES_TEXT.SORTBY_NAME_REVERSE) then
+		_listSortOrder = L.SORTBY_NAME
+	elseif (sortBy == L.SORTBY_NAME_REVERSE) then
 		sort(_listSorted, Badapples.CompareOnNameZtoA)
-		_listSortOrder = BADAPPLES_TEXT.SORTBY_NAME_REVERSE
-	elseif (sortBy == BADAPPLES_TEXT.SORTBY_REASON) then
+		_listSortOrder = L.SORTBY_NAME_REVERSE
+	elseif (sortBy == L.SORTBY_REASON) then
 		sort(_listSorted, Badapples.CompareOnReasonAtoZ)
-		_listSortOrder = BADAPPLES_TEXT.SORTBY_REASON
-	elseif (sortBy == BADAPPLES_TEXT.SORTBY_REASON_REVERSE) then
+		_listSortOrder = L.SORTBY_REASON
+	elseif (sortBy == L.SORTBY_REASON_REVERSE) then
 		sort(_listSorted, Badapples.CompareOnReasonZtoA)
-		_listSortOrder = BADAPPLES_TEXT.SORTBY_REASON_REVERSE
+		_listSortOrder = L.SORTBY_REASON_REVERSE
 	else
 		_listSortOrder = nil
 	end
@@ -389,7 +392,7 @@ function Badapples.GetDateAdded(name)
 	if (BadapplesState.Servers[_serverName].List[player]) then
 		if (BadapplesState.Servers[_serverName].List[player].Date) then
 			for mm, dd, yy in string.gmatch(BadapplesState.Servers[_serverName].List[player].Date, "(%w+)/(%w+)/(%w+)") do
-				local month = BADAPPLES_TEXT["MONTHNAME_"..mm]
+				local month = L["MONTHNAME_"..mm]
 				if (strsub(dd, 1, 1) == "0") then
 					dd = strsub(dd, 2)
 				end
@@ -407,8 +410,8 @@ end
 function Badapples.List()
 	-- Lists the current players on the Badapples list and the reasons they
 	-- are there.  This call always resorts the list into by name order.
-	if (_listSortOrder ~= BADAPPLES_TEXT.SORTBY_NAME) then
-		Badapples.SortList(BADAPPLES_TEXT.SORTBY_NAME)
+	if (_listSortOrder ~= L.SORTBY_NAME) then
+		Badapples.SortList(L.SORTBY_NAME)
 	end
 	if (_listCount > 0) then
 		if (_listCount == 1) then
@@ -424,9 +427,9 @@ function Badapples.List()
 		local name = _listSorted[i]
 		local reason = BadapplesState.Servers[_serverName].List[name].Reason
 		if (not reason) then
-			reason = BADAPPLES_TEXT.NO_REASON
+			reason = L.NO_REASON
 		end
-		DEFAULT_CHAT_FRAME:AddMessage(format(BADAPPLES_TEXT.LIST_FORMAT, BAD_ON..name..BAD_OFF, reason))
+		DEFAULT_CHAT_FRAME:AddMessage(format(L.LIST_FORMAT, BAD_ON..name..BAD_OFF, reason))
 	end
 end
 
@@ -437,20 +440,20 @@ function Badapples.Status(name, silent)
 	-- parameter is not nil then no output is generated.
 	if (not name or (name == "")) then
 		if (not silent) then
-			DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.PLAYERNAME_FAILED)
+			DEFAULT_CHAT_FRAME:AddMessage(L.PLAYERNAME_FAILED)
 		end
 		return nil
 	end
 	local player = Badapples.FormatName(name)
 	if (BadapplesState.Servers[_serverName].List[player]) then
 		if (not silent) then
-			local reason = BadapplesState.Servers[_serverName].List[player].Reason or BADAPPLES_TEXT.NO_REASON
-			Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_BAD, player, reason, nil, DEFAULT_CHAT_FRAME)
+			local reason = BadapplesState.Servers[_serverName].List[player].Reason or L.NO_REASON
+			Badapples.NotifyPlayer(L.NOTIFY_BAD, player, reason, nil, DEFAULT_CHAT_FRAME)
 		end
 		return 1
 	else
 		if (not silent) then
-			DEFAULT_CHAT_FRAME:AddMessage(format(BADAPPLES_TEXT.STATUS_GOOD, player))
+			DEFAULT_CHAT_FRAME:AddMessage(format(L.STATUS_GOOD, player))
 		end
 	end
 	return nil
@@ -462,13 +465,13 @@ function Badapples.Add(name_and_reason)
 	-- list, returning 1 if the player was added successfully (or is already
 	-- present) or nil otherwise.
 	if (not name_and_reason or (name_and_reason == "")) then
-		DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.PLAYERNAME_FAILED)
+		DEFAULT_CHAT_FRAME:AddMessage(L.PLAYERNAME_FAILED)
 		return nil
 	end
 	local name, reason = Badapples.GetNextParam(name_and_reason)
 	local player = Badapples.FormatName(name)
 	if (player == _playerName) then
-		DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.PLAYERNAME_ISSELF)
+		DEFAULT_CHAT_FRAME:AddMessage(L.PLAYERNAME_ISSELF)
 		return nil
 	end
 	if (reason and (strlen(reason) > BADAPPLES_MAXIMUM_REASON_LENGTH)) then
@@ -478,9 +481,9 @@ function Badapples.Add(name_and_reason)
 		BadapplesState.Servers[_serverName].List[player].Reason = reason
 		BadapplesState.Servers[_serverName].List[player].Date = Badapples.GetTodaysDate()
 		if (not reason) then
-			reason = BADAPPLES_TEXT.NO_REASON
+			reason = L.NO_REASON
 		end
-		DEFAULT_CHAT_FRAME:AddMessage(format(BADAPPLES_TEXT.UPDATE_CONFIRM, BAD_ON..player..BAD_OFF, reason))
+		DEFAULT_CHAT_FRAME:AddMessage(format(L.UPDATE_CONFIRM, BAD_ON..player..BAD_OFF, reason))
 	else
 		BadapplesState.Servers[_serverName].List[player] = {}
 		BadapplesState.Servers[_serverName].List[player].Reason = reason
@@ -493,9 +496,9 @@ function Badapples.Add(name_and_reason)
 		end
 		Badapples.SortList(_listSortOrder)
 		if (not reason) then
-			reason = BADAPPLES_TEXT.NO_REASON
+			reason = L.NO_REASON
 		end
-		DEFAULT_CHAT_FRAME:AddMessage(format(BADAPPLES_TEXT.ADD_CONFIRM, BAD_ON..player..BAD_OFF, reason))
+		DEFAULT_CHAT_FRAME:AddMessage(format(L.ADD_CONFIRM, BAD_ON..player..BAD_OFF, reason))
 	end
 	-- Update the Badapples frame and target display
 	if (BadapplesFrame:IsShown()) then
@@ -509,7 +512,7 @@ end
 
 function Badapples.Remove(name)
 	if (not name or (name == "")) then
-		DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.PLAYERNAME_FAILED)
+		DEFAULT_CHAT_FRAME:AddMessage(L.PLAYERNAME_FAILED)
 		return
 	end
 	local player = Badapples.FormatName(name)
@@ -522,14 +525,14 @@ function Badapples.Remove(name)
 			_listCount = _listCount - 1
 		end
 		Badapples.SortList(_listSortOrder)
-		DEFAULT_CHAT_FRAME:AddMessage(format(BADAPPLES_TEXT.REMOVE_CONFIRM, player))
+		DEFAULT_CHAT_FRAME:AddMessage(format(L.REMOVE_CONFIRM, player))
 		-- Update the Badapples frame and target display
 		if (BadapplesFrame:IsShown()) then
 			Badapples.Frame_ListUpdate()
 		end
 		Badapples.TargetFrame_CheckFaction()
 	else
-		DEFAULT_CHAT_FRAME:AddMessage(format(BADAPPLES_TEXT.REMOVE_NOTFOUND, player))
+		DEFAULT_CHAT_FRAME:AddMessage(format(L.REMOVE_NOTFOUND, player))
 	end
 end
 
@@ -537,7 +540,7 @@ end
 function Badapples.RemoveAll(confirm)
 	-- Removes all the player entries in the list
 	if (_listCount > 0) then
-		if (not confirm or (confirm ~= BADAPPLES_TEXT.COMMAND_REMOVEALL_CONFIRM)) then
+		if (not confirm or (confirm ~= L.COMMAND_REMOVEALL_CONFIRM)) then
 			StaticPopup_Show("BADAPPLE_REMOVEALL")
 			return
 		end
@@ -551,7 +554,7 @@ function Badapples.RemoveAll(confirm)
 		end
 		Badapples.TargetFrame_CheckFaction()
 	end
-	DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.REMOVEALL_CONFIRM)
+	DEFAULT_CHAT_FRAME:AddMessage(L.REMOVEALL_CONFIRM)
 end
 
 
@@ -578,10 +581,10 @@ function Badapples.CheckParty()
 			if (not _partyMembers[name]) then
 				if (BadapplesState.Servers[_serverName].List[name]) then
 					-- Uh oh, new party member is on the Badapples list!
-					Badapples.NotifyPlayer(BADAPPLES_TEXT.PARTY_WARNING, name, BadapplesState.Servers[_serverName].List[name].Reason or BADAPPLES_TEXT.NO_REASON, BADAPPLES_TEXT.PARTY_WARNING_NO_REASON)
+					Badapples.NotifyPlayer(L.PARTY_WARNING, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON, L.PARTY_WARNING_NO_REASON)
 				elseif (_ignoreList[name]) then
 					-- New party member is on the ignore list!
-					Badapples.NotifyPlayer(BADAPPLES_TEXT.PARTY_IGNORE_WARNING, name, nil, BADAPPLES_TEXT.PARTY_IGNORE_WARNING)
+					Badapples.NotifyPlayer(L.PARTY_IGNORE_WARNING, name, nil, L.PARTY_IGNORE_WARNING)
 				end
 			end
 			_partyMembers[name] = 1
@@ -608,10 +611,10 @@ function Badapples.CheckRaid()
 			if (not _raidMembers[name]) then
 				if (BadapplesState.Servers[_serverName].List[name]) then
 					-- Uh oh, new raid member is on the Badapples list!
-					Badapples.NotifyPlayer(BADAPPLES_TEXT.RAID_WARNING, name, BadapplesState.Servers[_serverName].List[name].Reason or BADAPPLES_TEXT.NO_REASON, BADAPPLES_TEXT.RAID_WARNING_NO_REASON)
+					Badapples.NotifyPlayer(L.RAID_WARNING, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON, L.RAID_WARNING_NO_REASON)
 				elseif (_ignoreList[name]) then
 					-- New raid member is on the ignore list!
-					Badapples.NotifyPlayer(BADAPPLES_TEXT.RAID_IGNORE_WARNING, name, nil, BADAPPLES_TEXT.RAID_IGNORE_WARNING)
+					Badapples.NotifyPlayer(L.RAID_IGNORE_WARNING, name, nil, L.RAID_IGNORE_WARNING)
 				end
 			end
 			_raidMembers[name] = 1
@@ -729,7 +732,7 @@ function Badapples.PlayerLogin()
 		BadapplesState.Servers[_serverName].Characters[_playerName] = {}
 	end
 	if (not BadapplesState.Servers[_serverName].Characters[_playerName].Tab) then
-		BadapplesState.Servers[_serverName].Characters[_playerName].Tab = BADAPPLES_TEXT.ENABLE_FRIENDS_TAB
+		BadapplesState.Servers[_serverName].Characters[_playerName].Tab = L.ENABLE_FRIENDS_TAB
 	end
 end
 
@@ -761,10 +764,10 @@ function Badapples.SetItemRef(link, text, button)
 			name = Badapples.FormatName(name)
 			if (BadapplesState.Servers[_serverName].List[name]) then
 				-- Warn user about this badapple
-				Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or BADAPPLES_TEXT.NO_REASON)
+				Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON)
 			elseif (_ignoreList[name]) then
 				-- Warn user about this ignored player
-				Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_IGNORE, name)
+				Badapples.NotifyPlayer(L.NOTIFY_IGNORE, name)
 			elseif (IsModifiedClick("CHATLINK")) then
 				-- Add it to the "add" dialog if it is visible
 				local staticPopup = StaticPopup_Visible("BADAPPLE_ADD")
@@ -791,14 +794,14 @@ function Badapples.StaticPopup_Show(popupName, text_arg1, text_arg2, data)
 			local replaceText = nil
 			if (BadapplesState.Servers[_serverName].List[name]) then
 				-- Warn user about this badapple
-				Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or BADAPPLES_TEXT.NO_REASON)
+				Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON)
 				-- Use our replacement PARTY_INVITE dialog in badapple mode
-				replaceText = format(BADAPPLES_TEXT.PARTY_INVITE_TEXT, BAD_ON..name..BAD_OFF)
+				replaceText = format(L.PARTY_INVITE_TEXT, BAD_ON..name..BAD_OFF)
 			elseif (_ignoreList[name]) then
 				-- Warn user about this ignored player
-				Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_IGNORE, name)
+				Badapples.NotifyPlayer(L.NOTIFY_IGNORE, name)
 				-- Use our replacement PARTY_INVITE dialog in ignore mode
-				replaceText = format(BADAPPLES_TEXT.PARTY_IGNORE_INVITE_TEXT, name)
+				replaceText = format(L.PARTY_IGNORE_INVITE_TEXT, name)
 			end
 			if (replaceText) then
 				-- Find the dialog being used and change its text and accept buttons
@@ -812,7 +815,7 @@ function Badapples.StaticPopup_Show(popupName, text_arg1, text_arg2, data)
 							text:SetText(replaceText)
 						end
 						if (button1 and button1:IsShown()) then
-							button1:SetText(BADAPPLES_TEXT.PARTY_INVITE_BUTTON)
+							button1:SetText(L.PARTY_INVITE_BUTTON)
 							local width = button1:GetTextWidth()
 							if (width > 120) then
 								button1:SetWidth(width + 20)
@@ -843,18 +846,18 @@ function Badapples.InviteUnit(name)
 		local playerName = Badapples.FormatName(name)
 		if (BadapplesState.Servers[_serverName].List[playerName]) then
 			-- Warn user about this badapple in Chat
-			Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_BAD, playerName, BadapplesState.Servers[_serverName].List[playerName].Reason or BADAPPLES_TEXT.NO_REASON)
+			Badapples.NotifyPlayer(L.NOTIFY_BAD, playerName, BadapplesState.Servers[_serverName].List[playerName].Reason or L.NO_REASON)
 			-- Warn user about inviting player by dialog box in badapple mode
-			_badapplesInvitePopup.text = BADAPPLES_TEXT.INVITE_TEXT
+			_badapplesInvitePopup.text = L.INVITE_TEXT
 			local dialogFrame = StaticPopup_Show("BADAPPLE_INVITE", BAD_ON..playerName..BAD_OFF)
 			if (dialogFrame) then
 				dialogFrame.data = playerName
 			end
 		elseif (_ignoreList[playerName]) then
 			-- Warn user about this ignored player in Chat
-			Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_IGNORE, playerName)
+			Badapples.NotifyPlayer(L.NOTIFY_IGNORE, playerName)
 			-- Warn user about inviting player by dialog box in ignore mode
-			_badapplesInvitePopup.text = BADAPPLES_TEXT.INVITE_IGNORE_TEXT
+			_badapplesInvitePopup.text = L.INVITE_IGNORE_TEXT
 			local dialogFrame = StaticPopup_Show("BADAPPLE_INVITE", playerName)
 			if (dialogFrame) then
 				dialogFrame.data = playerName
@@ -935,10 +938,10 @@ function Badapples.ChatEdit_UpdateHeader(editBox)
 			if (header) then
 				header:SetText(format(CHAT_WHISPER_SEND, BAD_ON..name..BAD_OFF))
 			end
-			Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or BADAPPLES_TEXT.NO_REASON)
+			Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON)
 		elseif (_ignoreList[name]) then
 			-- Warn user about this ignored player
-			Badapples.NotifyPlayer(BADAPPLES_TEXT.NOTIFY_IGNORE, name)
+			Badapples.NotifyPlayer(L.NOTIFY_IGNORE, name)
 		end
 	end
 end
@@ -950,7 +953,7 @@ end
 function Badapples.Frame_ListUpdate()
 	-- Start with inits
 	if (not BadapplesFrame.SortBy) then
-		BadapplesFrame.SortBy = BADAPPLES_TEXT.SORTBY_NAME
+		BadapplesFrame.SortBy = L.SORTBY_NAME
 	end
 	if (BadapplesFrame.SelectedName) then
 		if (not BadapplesState.Servers[_serverName].List[BadapplesFrame.SelectedName]) then
@@ -964,12 +967,12 @@ function Badapples.Frame_ListUpdate()
 	-- Format string for the total players text
 	if (_listCount > 0) then
 		if (_listCount == 1) then
-			BadapplesFrameTotals:SetText(BADAPPLES_TEXT.TOTAL_SINGLE)
+			BadapplesFrameTotals:SetText(L.TOTAL_SINGLE)
 		else
-			BadapplesFrameTotals:SetFormattedText(BADAPPLES_TEXT.TOTAL_MULTIPLE, _listCount)
+			BadapplesFrameTotals:SetFormattedText(L.TOTAL_MULTIPLE, _listCount)
 		end
 	else
-		BadapplesFrameTotals:SetText(BADAPPLES_TEXT.TOTAL_EMPTY)
+		BadapplesFrameTotals:SetText(L.TOTAL_EMPTY)
 	end
 
 	-- Now get parameters for what to display
@@ -1118,17 +1121,17 @@ end
 
 
 function Badapples.Frame_ToggleSortBy(sortBy)
-	if (sortBy == BADAPPLES_TEXT.SORTBY_NAME) then
-		if (_listSortOrder == BADAPPLES_TEXT.SORTBY_NAME) then
-			BadapplesFrame.SortBy = BADAPPLES_TEXT.SORTBY_NAME_REVERSE
+	if (sortBy == L.SORTBY_NAME) then
+		if (_listSortOrder == L.SORTBY_NAME) then
+			BadapplesFrame.SortBy = L.SORTBY_NAME_REVERSE
 		else
-			BadapplesFrame.SortBy = BADAPPLES_TEXT.SORTBY_NAME
+			BadapplesFrame.SortBy = L.SORTBY_NAME
 		end
-	elseif (sortBy == BADAPPLES_TEXT.SORTBY_REASON) then
-		if (_listSortOrder == BADAPPLES_TEXT.SORTBY_REASON) then
-			BadapplesFrame.SortBy = BADAPPLES_TEXT.SORTBY_REASON_REVERSE
+	elseif (sortBy == L.SORTBY_REASON) then
+		if (_listSortOrder == L.SORTBY_REASON) then
+			BadapplesFrame.SortBy = L.SORTBY_REASON_REVERSE
 		else
-			BadapplesFrame.SortBy = BADAPPLES_TEXT.SORTBY_REASON
+			BadapplesFrame.SortBy = L.SORTBY_REASON
 		end
 	end
 	Badapples.Frame_ListUpdate()
@@ -1282,14 +1285,14 @@ function Badapples.OnLoad(self)
 	StaticPopupDialogs["BADAPPLE_REMOVEALL"] = _badapplesConfirmRemoveAllPopup
 
 	-- Register with Blizzard interface options
-	Badapples.RegisterOptions(BADAPPLES_NAME, BADAPPLES_NAME.." v"..BADAPPLES_VERSION, BADAPPLES_DESCRIPTION, BADAPPLES_HELP)
+	Badapples.RegisterOptions(BADAPPLES_NAME, BADAPPLES_NAME.." v"..BADAPPLES_VERSION, L.DESCRIPTION, L.HELP)
 end
 
 
 function BadapplesTab_OnLoad(frame)
 	-- Called for each tab frame as they are loaded, this function sets the
 	-- tabs's appropriate text (long or short)
-	frame:SetText(BADAPPLES_TEXT.TAB_SHORTNAME)
+	frame:SetText(L.TAB_SHORTNAME)
 end
 
 
@@ -1373,28 +1376,28 @@ end
 function Badapples.SlashCommand(text)
 	if (text) then
 		local command, param = Badapples.GetNextParam(text)
-		if (command == BADAPPLES_TEXT.COMMAND_LIST) then
+		if (command == L.COMMAND_LIST) then
 			Badapples.List()
 
-		elseif (command == BADAPPLES_TEXT.COMMAND_SHOW) then
+		elseif (command == L.COMMAND_SHOW) then
 			Badapples.Show()
 
-		elseif ((command == BADAPPLES_TEXT.COMMAND_CHECK) or (command == BADAPPLES_TEXT.COMMAND_STATUS)) then
+		elseif ((command == L.COMMAND_CHECK) or (command == L.COMMAND_STATUS)) then
 			Badapples.Status(param)
 
-		elseif (command == BADAPPLES_TEXT.COMMAND_ADD) then
+		elseif (command == L.COMMAND_ADD) then
 			Badapples.Add(param)
 
-		elseif (command == BADAPPLES_TEXT.COMMAND_REMOVE) then
+		elseif (command == L.COMMAND_REMOVE) then
 			Badapples.Remove(param)
 
-		elseif (command == BADAPPLES_TEXT.COMMAND_REMOVEALL) then
+		elseif (command == L.COMMAND_REMOVEALL) then
 			Badapples.RemoveAll()
 
-		elseif ((command == BADAPPLES_TEXT.COMMAND_COLOR) or (command == BADAPPLES_TEXT.COMMAND_SETCOLOR)) then
+		elseif ((command == L.COMMAND_COLOR) or (command == L.COMMAND_SETCOLOR)) then
 			Badapples.ShowColorPicker()
 
-		elseif (command == BADAPPLES_TEXT.COMMAND_DEBUGON) then
+		elseif (command == L.COMMAND_DEBUGON) then
 			_debugFrame = nil
 			local frameNum = tonumber(param or "")
 			if (frameNum and (frameNum >= 1) and (frameNum <= 7)) then
@@ -1403,17 +1406,17 @@ function Badapples.SlashCommand(text)
 			if (not _debugFrame) then
 				_debugFrame = DEFAULT_CHAT_FRAME
 			end
-			DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.DEBUGON_CONFIRM)
+			DEFAULT_CHAT_FRAME:AddMessage(L.DEBUGON_CONFIRM)
 
-		elseif (command == BADAPPLES_TEXT.COMMAND_DEBUGOFF) then
+		elseif (command == L.COMMAND_DEBUGOFF) then
 			_debugFrame = nil
-			DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_TEXT.DEBUGOFF_CONFIRM)
+			DEFAULT_CHAT_FRAME:AddMessage(L.DEBUGOFF_CONFIRM)
 
 		else
 			DEFAULT_CHAT_FRAME:AddMessage(EM_ON..BADAPPLES_NAME.." v"..BADAPPLES_VERSION..EM_OFF)
-			DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_DESCRIPTION)
-			for i = 1, #BADAPPLES_HELP do
-				DEFAULT_CHAT_FRAME:AddMessage(BADAPPLES_HELP[i])
+			DEFAULT_CHAT_FRAME:AddMessage(L.DESCRIPTION)
+			for i = 1, #L.HELP do
+				DEFAULT_CHAT_FRAME:AddMessage(L.HELP[i])
 			end
 		end
 	end
@@ -1424,7 +1427,7 @@ end
 -- Exported functions
 ------------------------------------------------------------------------------
 function Badapples.CheckName(name)
-	-- Returns the reason text, or BADAPPLES_TEXT.NO_REASON if the provided
+	-- Returns the reason text, or L.NO_REASON if the provided
 	-- name is on the player's badapples list, or nil otherwise.
 	if (_serverName and BadapplesState.Servers and BadapplesState.Servers[_serverName]) then
 		if (name and (name ~= "")) then
@@ -1432,7 +1435,7 @@ function Badapples.CheckName(name)
 			if (BadapplesState.Servers[_serverName].List[name]) then
 				local reason = BadapplesState.Servers[_serverName].List[name].Reason
 				if (not reason) then
-					reason = BADAPPLES_TEXT.NO_REASON
+					reason = L.NO_REASON
 				end
 				return reason
 			end

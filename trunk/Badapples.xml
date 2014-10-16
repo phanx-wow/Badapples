@@ -1,5 +1,4 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
-	<Script file="Badapples.lua"/>
 	<Button name="BadapplesFrameColumnHeaderTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="10" y="22"/>
@@ -158,11 +157,11 @@
 						<Scripts>
 							<OnLoad>
 								WhoFrameColumn_SetWidth(self, 83)
-								self:SetText(BADAPPLES_TEXT.COLUMN_NAME)
+								self:SetText(Badapples.L.COLUMN_NAME)
 							</OnLoad>
 							<OnClick>
 								PlaySound("igMainMenuOptionCheckBoxOn")
-								Badapples.Frame_ToggleSortBy(BADAPPLES_TEXT.SORTBY_NAME)
+								Badapples.Frame_ToggleSortBy(Badapples.L.SORTBY_NAME)
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -177,11 +176,11 @@
 						<Scripts>
 							<OnLoad>
 								WhoFrameColumn_SetWidth(self, 240)
-								self:SetText(BADAPPLES_TEXT.COLUMN_REASON)
+								self:SetText(Badapples.L.COLUMN_REASON)
 							</OnLoad>
 							<OnClick>
 								PlaySound("igMainMenuOptionCheckBoxOn")
-								Badapples.Frame_ToggleSortBy(BADAPPLES_TEXT.SORTBY_REASON)
+								Badapples.Frame_ToggleSortBy(Badapples.L.SORTBY_REASON)
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -198,14 +197,14 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self:SetText(BADAPPLES_TEXT.BUTTON_REMOVE)
+								self:SetText(Badapples.L.BUTTON_REMOVE)
 							</OnLoad>
 							<OnClick>
 								Badapples.Frame_Remove()
 							</OnClick>
 							<OnEnter>
 								GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-								GameTooltip:SetText(BADAPPLES_TEXT.BUTTON_REMOVE_TOOLTIP, 1, 1, 1)
+								GameTooltip:SetText(Badapples.L.BUTTON_REMOVE_TOOLTIP, 1, 1, 1)
 								GameTooltip:Show()
 							</OnEnter>
 							<OnLeave>
@@ -226,14 +225,14 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self:SetText(BADAPPLES_TEXT.BUTTON_ADD)
+								self:SetText(Badapples.L.BUTTON_ADD)
 							</OnLoad>
 							<OnClick>
 								Badapples.Frame_Add()
 							</OnClick>
 							<OnEnter>
 								GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-								GameTooltip:SetText(BADAPPLES_TEXT.BUTTON_ADD_TOOLTIP, 1, 1, 1)
+								GameTooltip:SetText(Badapples.L.BUTTON_ADD_TOOLTIP, 1, 1, 1)
 								GameTooltip:Show()
 							</OnEnter>
 							<OnLeave>
@@ -254,14 +253,14 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self:SetText(BADAPPLES_TEXT.BUTTON_SETCOLOR)
+								self:SetText(Badapples.L.BUTTON_SETCOLOR)
 							</OnLoad>
 							<OnClick>
 								Badapples.ShowColorPicker()
 							</OnClick>
 							<OnEnter>
 								GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-								GameTooltip:SetText(BADAPPLES_TEXT.BUTTON_SETCOLOR_TOOLTIP, 1, 1, 1)
+								GameTooltip:SetText(Badapples.L.BUTTON_SETCOLOR_TOOLTIP, 1, 1, 1)
 								GameTooltip:Show()
 							</OnEnter>
 							<OnLeave>

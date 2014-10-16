@@ -5,7 +5,7 @@
 	tooltips to each entry in the Badapples list panel.
 ----------------------------------------------------------------------]]
 
---setfenv(FriendsFrame_OnShow, setmetatable({ UpdateMicroButtons = function() end }, { __index = _G }))
+local _, L = ...
 
 ------------------------------------------------------------------------
 
@@ -22,6 +22,12 @@ BadapplesListScrollFrame:SetHeight(BADAPPLES_DISPLAY_COUNT * BadapplesFrameButto
 
 BadapplesFrameTotals:ClearAllPoints()
 BadapplesFrameTotals:SetPoint("TOPLEFT", BadapplesFrameNameColumnHeader, "BOTTOMLEFT", 0, -2 - BADAPPLES_DISPLAY_COUNT * BadapplesFrameButton1:GetHeight())
+
+BadapplesFrameEditBox:SetPoint("BOTTOM", 0, 30)
+BadapplesFrameEditBox:SetHeight(24)
+BadapplesFrameEditBox:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-TooltipBackground", tile = true, tileSize = 16, edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16, insets = { left = 5, right = 5, top = 5, bottom = 5 } })
+BadapplesFrameEditBox:SetBackdropColor(0, 0, 0)
+BadapplesFrameEditBox:SetBackdropBorderColor(0.8, 0.8, 0.8)
 
 BadapplesFrameColorButton:ClearAllPoints()
 BadapplesFrameColorButton:SetPoint("TOPLEFT", BadapplesFrameTotals, "BOTTOMLEFT", 0, -2)
@@ -49,7 +55,7 @@ BADAPPLES_TAB_ID = tabID
 local tab = CreateFrame("Button", "FriendsTabHeaderTab"..tabID, FriendsTabHeader, "TabButtonTemplate")
 
 tab:SetPoint("LEFT", _G["FriendsTabHeaderTab"..(tabID-1)]:IsShown() and _G["FriendsTabHeaderTab"..(tabID-1)] or _G["FriendsTabHeaderTab"..(tabID-2)], "RIGHT", 0, 0)
-tab:SetText(id == 5 and BADAPPLES_TEXT.TAB_SHORTNAME or BADAPPLES_TEXT.TAB_LONGNAME)
+tab:SetText(id == 5 and L.TAB_SHORTNAME or L.TAB_LONGNAME)
 tab:SetID(tabID)
 
 tab:SetScript("OnClick", function(self)
@@ -73,7 +79,7 @@ function FriendsFrame_Update()
 		return hook_FriendsFrame_Update()
 	end
 
-	FriendsFrameTitleText:SetText(BADAPPLES_TEXT.TITLETEXT)
+	FriendsFrameTitleText:SetText(L.TITLETEXT)
 	FriendsFrame_ShowSubFrame("BadapplesFrame")
 
 	FriendsTabHeader:Show() -- not sure why it sometimes hides itself
@@ -124,11 +130,11 @@ local BadapplesButton_OnEnter = function(self)
 	local date = Badapples.GetDateAdded(name)
 	local source = Badapples.GetSource(name)
 	if date and source then
-		GameTooltip:AddLine(format(BADAPPLES_TEXT.ADDED_BY_ON, source, date), nil, nil, nil, 1, 1)
+		GameTooltip:AddLine(format(L.ADDED_BY_ON, source, date), nil, nil, nil, 1, 1)
 	elseif source then
-		GameTooltip:AddLine(format(BADAPPLES_TEXT.ADDED_BY, source), nil, nil, nil, 1, 1)
+		GameTooltip:AddLine(format(L.ADDED_BY, source), nil, nil, nil, 1, 1)
 	elseif date then
-		GameTooltip:AddLine(format(BADAPPLES_TEXT.ADDED_ON, date), nil, nil, nil, 1, 1)
+		GameTooltip:AddLine(format(L.ADDED_ON, date), nil, nil, nil, 1, 1)
 	end
 
 	GameTooltip:Show()
