@@ -1,15 +1,15 @@
 ## Interface: 60000
-## Version: 6.0.4.wowi:revision
+## Version: 6.0.2.13
 
 ## Title: Badapples
-## Notes: Allows for you to store the names of players you don't want to ever group with.
+## Notes: Stores the names of players you don't want to ever group with.
+## Notes-deDE: Spiechert die Namen der Spieler, mit denen Ihr nie spielen wollt.  
+## Notes-esES: Guardar los nombres de jugadores con los que nunca quieres jugar.
+## Notes-esMX: Guardar los nombres de jugadores con los que nunca quieres jugar.
 
-## Author: Cirk, Phanx
-## X-CompatibleLocales: enUS, deDE, esES, esMX, frFR, itIT, ptBR, koKR, ruRU, zhCN, zhTW
-## X-Localizations: enUS, deDE, esES, esMX, ruRU
-## X-Website: http://www.wowinterface.com/downloads/info4538-Badapples.html
-## X-Curse-Project-ID: badapples
-## X-WoWI-ID: 4538
+## Author: Phanx, Cirk
+## X-Copyright: Copyright (c) 2005-2014 Cirk @ Doomhammer EU. Copyright (c) 2008-2014 Phanx <addons@phanx.net>. All rights reserved.
+## X-Website: https://github.com/Phanx/Badapples
 
 ## SavedVariables: BadapplesState
 
@@ -22,5 +22,3 @@ Badapples.lua
 Badapples.xml
 
 BadapplesFix.lua
-
-# Badapples2.lua
