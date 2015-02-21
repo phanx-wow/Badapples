@@ -1,5 +1,5 @@
 ## Interface: 60000
-## Version: 6.0.2.13
+## Version: @project-version@
 
 ## Title: Badapples
 ## Notes: Stores the names of players you don't want to ever group with.
