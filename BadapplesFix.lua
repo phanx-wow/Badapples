@@ -89,8 +89,7 @@ end
 --	Improved tooltips!
 ------------------------------------------------------------------------
 
-local _playerName = UnitName("player")
-local _serverName = GetRealmName()
+local _playerName = format("%s-%s", UnitFullName("player"))
 
 function Badapples.GetSource(name)
 	-- Returns the name of the character logged in when the given player name
@@ -99,8 +98,8 @@ function Badapples.GetSource(name)
 		return
 	end
 	local player = Badapples.FormatName(name)
-	if BadapplesState.Servers[_serverName].List[player] then
-		return BadapplesState.Servers[_serverName].List[player].Source
+	if BadapplesState.List[player] then
+		return BadapplesState.List[player].Source
 	end
 end
 
@@ -110,8 +109,8 @@ function Badapples.Add(name_and_reason)
 	Badapples_Add(name_and_reason)
 
 	local player = Badapples.FormatName(Badapples.GetNextParam(name_and_reason))
-	if BadapplesState.Servers[_serverName].List[player] then
-		BadapplesState.Servers[_serverName].List[player].Source = _playerName
+	if BadapplesState.List[player] then
+		BadapplesState.List[player].Source = _playerName
 	end
 end
 

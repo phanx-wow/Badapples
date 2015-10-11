@@ -1,3 +1,7 @@
+### Version 6.2.2.14
+
+* Added support for cross-realm names (finally!)
+
 ### Version 6.0.2.13
 
 * Updated for WoW 6.0

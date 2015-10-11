@@ -124,7 +124,7 @@
 				Badapples.OnLoad(self)
 			</OnLoad>
 			<OnEvent>
-				Badapples.OnEvent(event, ...)
+				Badapples.OnEvent(self, event, ...)
 			</OnEvent>
 		</Scripts>
 		<Frames>

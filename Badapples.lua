@@ -28,8 +28,9 @@
 ------------------------------------------------------------------------------
 -- AddOn version
 ------------------------------------------------------------------------------
-BADAPPLES_NAME = "Cirk's Badapples"
-BADAPPLES_VERSION = "3.2.0"
+local BADAPPLES, L = ...
+BADAPPLES_NAME = GetAddOnMetadata(BADAPPLES, "Title")
+BADAPPLES_VERSION = GetAddOnMetadata(BADAPPLES, "Version")
 
 
 ------------------------------------------------------------------------------
@@ -41,7 +42,6 @@ BadapplesState = {}						-- Will be overridden when loaded
 BADAPPLES_FRAME_SCROLL_HEIGHT = 16
 BADAPPLES_DISPLAY_COUNT = 17
 
-local _, L = ...
 Badapples.L = L
 
 
@@ -76,7 +76,7 @@ local _original_InviteUnit					-- Original InviteUnit function
 local _original_GameTooltip_UnitColor		-- Original GameTooltip_UnitColor function
 
 local _thisFrame = BadapplesScriptFrame						-- The frame pointer
-local _debugFrame = nil					-- ChatFrame that debug goes to, or nil if debug disabled
+local _debugFrame = ChatFrame3					-- ChatFrame that debug goes to, or nil if debug disabled
 local _serverName = nil					-- set to current realm when loaded
 local _playerName = nil					-- set to name of player when known
 local _listCount = 0						-- current number of entries in list
@@ -325,8 +325,8 @@ end
 
 
 function Badapples.CompareOnReasonAtoZ(name1, name2)
-	local reason1 = BadapplesState.Servers[_serverName].List[name1].Reason
-	local reason2 = BadapplesState.Servers[_serverName].List[name2].Reason
+	local reason1 = BadapplesState.List[name1].Reason
+	local reason2 = BadapplesState.List[name2].Reason
 	if (not reason1) then
 		return false
 	end
@@ -338,8 +338,8 @@ end
 
 
 function Badapples.CompareOnReasonZtoA(name1, name2)
-	local reason1 = BadapplesState.Servers[_serverName].List[name1].Reason
-	local reason2 = BadapplesState.Servers[_serverName].List[name2].Reason
+	local reason1 = BadapplesState.List[name1].Reason
+	local reason2 = BadapplesState.List[name2].Reason
 	if (not reason2) then
 		return false
 	end
@@ -354,7 +354,7 @@ function Badapples.SortList(sortBy)
 	-- Creates the _listSorted list that can be used to return the values of
 	-- the Badapples list in the appropriate sorted order
 	_listSorted = {}
-	for name in pairs(BadapplesState.Servers[_serverName].List) do
+	for name in pairs(BadapplesState.List) do
 		tinsert(_listSorted, name)
 	end
 	if (sortBy == L.SORTBY_NAME) then
@@ -389,9 +389,9 @@ function Badapples.GetDateAdded(name)
 		return nil
 	end
 	local player = Badapples.FormatName(name)
-	if (BadapplesState.Servers[_serverName].List[player]) then
-		if (BadapplesState.Servers[_serverName].List[player].Date) then
-			for mm, dd, yy in string.gmatch(BadapplesState.Servers[_serverName].List[player].Date, "(%w+)/(%w+)/(%w+)") do
+	if (BadapplesState.List[player]) then
+		if (BadapplesState.List[player].Date) then
+			for mm, dd, yy in string.gmatch(BadapplesState.List[player].Date, "(%w+)/(%w+)/(%w+)") do
 				local month = L["MONTHNAME_"..mm]
 				if (strsub(dd, 1, 1) == "0") then
 					dd = strsub(dd, 2)
@@ -425,7 +425,7 @@ function Badapples.List()
 	end
 	for i = 1, #_listSorted do
 		local name = _listSorted[i]
-		local reason = BadapplesState.Servers[_serverName].List[name].Reason
+		local reason = BadapplesState.List[name].Reason
 		if (not reason) then
 			reason = L.NO_REASON
 		end
@@ -445,9 +445,9 @@ function Badapples.Status(name, silent)
 		return nil
 	end
 	local player = Badapples.FormatName(name)
-	if (BadapplesState.Servers[_serverName].List[player]) then
+	if (BadapplesState.List[player]) then
 		if (not silent) then
-			local reason = BadapplesState.Servers[_serverName].List[player].Reason or L.NO_REASON
+			local reason = BadapplesState.List[player].Reason or L.NO_REASON
 			Badapples.NotifyPlayer(L.NOTIFY_BAD, player, reason, nil, DEFAULT_CHAT_FRAME)
 		end
 		return 1
@@ -477,17 +477,17 @@ function Badapples.Add(name_and_reason)
 	if (reason and (strlen(reason) > BADAPPLES_MAXIMUM_REASON_LENGTH)) then
 		reason = strsub(reason, 1, BADAPPLES_MAXIMUM_REASON_LENGTH)
 	end
-	if (BadapplesState.Servers[_serverName].List[player]) then
-		BadapplesState.Servers[_serverName].List[player].Reason = reason
-		BadapplesState.Servers[_serverName].List[player].Date = Badapples.GetTodaysDate()
+	if (BadapplesState.List[player]) then
+		BadapplesState.List[player].Reason = reason
+		BadapplesState.List[player].Date = Badapples.GetTodaysDate()
 		if (not reason) then
 			reason = L.NO_REASON
 		end
 		DEFAULT_CHAT_FRAME:AddMessage(format(L.UPDATE_CONFIRM, BAD_ON..player..BAD_OFF, reason))
 	else
-		BadapplesState.Servers[_serverName].List[player] = {}
-		BadapplesState.Servers[_serverName].List[player].Reason = reason
-		BadapplesState.Servers[_serverName].List[player].Date = Badapples.GetTodaysDate()
+		BadapplesState.List[player] = {}
+		BadapplesState.List[player].Reason = reason
+		BadapplesState.List[player].Date = Badapples.GetTodaysDate()
 		if (_listCount == 0) then
 			-- First player added to list, so register events as well
 			_listCount = 1
@@ -516,8 +516,8 @@ function Badapples.Remove(name)
 		return
 	end
 	local player = Badapples.FormatName(name)
-	if (BadapplesState.Servers[_serverName].List[player]) then
-		BadapplesState.Servers[_serverName].List[player] = nil
+	if (BadapplesState.List[player]) then
+		BadapplesState.List[player] = nil
 		if (_listCount == 1) then
 			-- Last player removed, so unregister events as well
 			_listCount = 0
@@ -544,7 +544,7 @@ function Badapples.RemoveAll(confirm)
 			StaticPopup_Show("BADAPPLE_REMOVEALL")
 			return
 		end
-		BadapplesState.Servers[_serverName].List = {}
+		BadapplesState.List = {}
 		_listCount = 0
 		-- Update the sorted list to be empty to
 		Badapples.SortList(_listSortOrder)
@@ -579,9 +579,9 @@ function Badapples.CheckParty()
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
 			if (not _partyMembers[name]) then
-				if (BadapplesState.Servers[_serverName].List[name]) then
+				if (BadapplesState.List[name]) then
 					-- Uh oh, new party member is on the Badapples list!
-					Badapples.NotifyPlayer(L.PARTY_WARNING, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON, L.PARTY_WARNING_NO_REASON)
+					Badapples.NotifyPlayer(L.PARTY_WARNING, name, BadapplesState.List[name].Reason or L.NO_REASON, L.PARTY_WARNING_NO_REASON)
 				elseif (_ignoreList[name]) then
 					-- New party member is on the ignore list!
 					Badapples.NotifyPlayer(L.PARTY_IGNORE_WARNING, name, nil, L.PARTY_IGNORE_WARNING)
@@ -609,9 +609,9 @@ function Badapples.CheckRaid()
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
 			if (not _raidMembers[name]) then
-				if (BadapplesState.Servers[_serverName].List[name]) then
+				if (BadapplesState.List[name]) then
 					-- Uh oh, new raid member is on the Badapples list!
-					Badapples.NotifyPlayer(L.RAID_WARNING, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON, L.RAID_WARNING_NO_REASON)
+					Badapples.NotifyPlayer(L.RAID_WARNING, name, BadapplesState.List[name].Reason or L.NO_REASON, L.RAID_WARNING_NO_REASON)
 				elseif (_ignoreList[name]) then
 					-- New raid member is on the ignore list!
 					Badapples.NotifyPlayer(L.RAID_IGNORE_WARNING, name, nil, L.RAID_IGNORE_WARNING)
@@ -676,7 +676,9 @@ function Badapples.HookNeededFunctions()
 end
 
 
-function Badapples.VariablesLoaded()
+function Badapples.PLAYER_LOGIN()
+	_playerName, _serverName = UnitFullName("player")
+
 	if (not BadapplesState) then
 		BadapplesState = {}
 	end
@@ -691,17 +693,25 @@ function Badapples.VariablesLoaded()
 	end
 	_highlightColors = BadapplesState.Colors
 	Badapples.UpdateHighlightText()
-	if (not BadapplesState.Servers) then
-		BadapplesState.Servers = {}
+
+	if (not BadapplesState.List) then
+		BadapplesState.List = {}
 	end
-	if (not BadapplesState.Servers[_serverName]) then
-		BadapplesState.Servers[_serverName] = {}
-	end
-	if (not BadapplesState.Servers[_serverName].List) then
-		BadapplesState.Servers[_serverName].List = {}
-	end
-	if (not BadapplesState.Servers[_serverName].Characters) then
-		BadapplesState.Servers[_serverName].Characters = {}
+	if BadapplesState.Servers then
+		print("|cffffd200Badapples:|r Importing old per-server data...")
+		for server, serverDB in pairs(BadapplesState.Servers) do
+			server = gsub(server, " ", "") -- remove spaces, should work for most/all servers
+			print("   Server:", server)
+			for name, data in pairs(serverDB.List) do
+				print("      Name:", name)
+				BadapplesState.List[name.."-"..server] = data
+				if data.Source then
+					data.Source = data.Source .. "-" .. server
+				end
+			end
+		end
+		print("   Done.")
+		BadapplesState.Servers = nil
 	end
 
 	-- Hook all various functions we need
@@ -709,7 +719,7 @@ function Badapples.VariablesLoaded()
 
 	-- Update _listCount
 	_listCount = 0
-	for name in pairs(BadapplesState.Servers[_serverName].List) do
+	for name in pairs(BadapplesState.List) do
 		_listCount = _listCount + 1
 	end
 	if (_debugFrame) then
@@ -726,24 +736,13 @@ function Badapples.VariablesLoaded()
 end
 
 
-function Badapples.PlayerLogin()
-	-- Get the user's setting for the social tab
-	if (not BadapplesState.Servers[_serverName].Characters[_playerName]) then
-		BadapplesState.Servers[_serverName].Characters[_playerName] = {}
-	end
-	if (not BadapplesState.Servers[_serverName].Characters[_playerName].Tab) then
-		BadapplesState.Servers[_serverName].Characters[_playerName].Tab = L.ENABLE_FRIENDS_TAB
-	end
-end
-
-
 ------------------------------------------------------------------------------
 -- Hooked functions for ChatFrame
 ------------------------------------------------------------------------------
 function Badapples.GetColoredName(event, arg1, arg2, ...)
 	if (_chatEventList[event]) then
 		-- All these events have the player name in arg2
-		if (BadapplesState.Servers[_serverName].List[arg2]) then
+		if (BadapplesState.List[arg2]) then
 			return BAD_ON..arg2..BAD_OFF
 		end
 	end
@@ -762,9 +761,9 @@ function Badapples.SetItemRef(link, text, button)
 		local name, lineid = strsplit(":", strsub(link, 8))
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
-			if (BadapplesState.Servers[_serverName].List[name]) then
+			if (BadapplesState.List[name]) then
 				-- Warn user about this badapple
-				Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON)
+				Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.List[name].Reason or L.NO_REASON)
 			elseif (_ignoreList[name]) then
 				-- Warn user about this ignored player
 				Badapples.NotifyPlayer(L.NOTIFY_IGNORE, name)
@@ -792,9 +791,9 @@ function Badapples.StaticPopup_Show(popupName, text_arg1, text_arg2, data)
 		local name = Badapples.FormatName(text_arg1)
 		if (name and (name ~= "")) then
 			local replaceText = nil
-			if (BadapplesState.Servers[_serverName].List[name]) then
+			if (BadapplesState.List[name]) then
 				-- Warn user about this badapple
-				Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON)
+				Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.List[name].Reason or L.NO_REASON)
 				-- Use our replacement PARTY_INVITE dialog in badapple mode
 				replaceText = format(L.PARTY_INVITE_TEXT, BAD_ON..name..BAD_OFF)
 			elseif (_ignoreList[name]) then
@@ -844,9 +843,9 @@ end
 function Badapples.InviteUnit(name)
 	if (name and (name ~= "")) then
 		local playerName = Badapples.FormatName(name)
-		if (BadapplesState.Servers[_serverName].List[playerName]) then
+		if (BadapplesState.List[playerName]) then
 			-- Warn user about this badapple in Chat
-			Badapples.NotifyPlayer(L.NOTIFY_BAD, playerName, BadapplesState.Servers[_serverName].List[playerName].Reason or L.NO_REASON)
+			Badapples.NotifyPlayer(L.NOTIFY_BAD, playerName, BadapplesState.List[playerName].Reason or L.NO_REASON)
 			-- Warn user about inviting player by dialog box in badapple mode
 			_badapplesInvitePopup.text = L.INVITE_TEXT
 			local dialogFrame = StaticPopup_Show("BADAPPLE_INVITE", BAD_ON..playerName..BAD_OFF)
@@ -881,7 +880,7 @@ function Badapples.TargetFrame_CheckFaction(self)
 		local name = UnitName("target")
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
-			if (BadapplesState.Servers[_serverName].List[name]) then
+			if (BadapplesState.List[name]) then
 				-- We have a Badapple in the target, so we change the color
 				-- only if the player is not attackable by us (i.e., they are
 				-- not yet flagged) so as to leave the normal color clues for
@@ -906,7 +905,7 @@ function Badapples.GameTooltip_UnitColor(unit)
 		local name = UnitName(unit)
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
-			if (BadapplesState.Servers[_serverName].List[name]) then
+			if (BadapplesState.List[name]) then
 				-- We have a Badapple in the target, so we change the color
 				-- only if the player is not attackable by us (i.e., they are
 				-- not yet flagged) so as to leave the normal color clues for
@@ -932,13 +931,13 @@ function Badapples.ChatEdit_UpdateHeader(editBox)
 	local chatType = editBox:GetAttribute("chatType")
 	if (chatType == "WHISPER") then
 		local name = Badapples.FormatName(editBox:GetAttribute("tellTarget") or "")
-		if (BadapplesState.Servers[_serverName].List[name]) then
+		if (BadapplesState.List[name]) then
 			-- Update header color and warn user about this badapple
 			local header = _G[editBox:GetName().."Header"]
 			if (header) then
 				header:SetText(format(CHAT_WHISPER_SEND, BAD_ON..name..BAD_OFF))
 			end
-			Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.Servers[_serverName].List[name].Reason or L.NO_REASON)
+			Badapples.NotifyPlayer(L.NOTIFY_BAD, name, BadapplesState.List[name].Reason or L.NO_REASON)
 		elseif (_ignoreList[name]) then
 			-- Warn user about this ignored player
 			Badapples.NotifyPlayer(L.NOTIFY_IGNORE, name)
@@ -956,7 +955,7 @@ function Badapples.Frame_ListUpdate()
 		BadapplesFrame.SortBy = L.SORTBY_NAME
 	end
 	if (BadapplesFrame.SelectedName) then
-		if (not BadapplesState.Servers[_serverName].List[BadapplesFrame.SelectedName]) then
+		if (not BadapplesState.List[BadapplesFrame.SelectedName]) then
 			BadapplesFrame.SelectedName = nil
 		end
 	end
@@ -987,9 +986,14 @@ function Badapples.Frame_ListUpdate()
 		if (index <= _listCount) then
 			name = _listSorted[index]
 			button.Name = name
-			nameText:SetText(name)
+			local nameName, nameServer = strmatch(name, "([%-]+)%-(.+)")
+			if nameServer == _serverName then
+				nameText:SetText(nameName) -- Hide realm if it's the current one
+			else
+				nameText:SetText(name)
+			end
 			nameText:SetTextColor(_highlightColors.r, _highlightColors.g, _highlightColors.b)
-			reason = BadapplesState.Servers[_serverName].List[name].Reason
+			reason = BadapplesState.List[name].Reason
 			if (reason) then
 				reasonText:SetText(reason)
 			else
@@ -1024,7 +1028,7 @@ function Badapples.Frame_ListUpdate()
 		-- when a new text string is shorter than the previous one (see
 		-- corresponding code in Badapples.xml).
 		BadapplesFrameEditBox:SetText("\032")
-		reason = BadapplesState.Servers[_serverName].List[BadapplesFrame.SelectedName].Reason
+		reason = BadapplesState.List[BadapplesFrame.SelectedName].Reason
 		if (reason) then
 			BadapplesFrameEditBox.newText = reason
 		else
@@ -1041,7 +1045,7 @@ function Badapples.Frame_ListUpdate()
 		local name = UnitName("target")
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
-			if (BadapplesState.Servers[_serverName].List[name]) then
+			if (BadapplesState.List[name]) then
 				BadapplesFrameAddButton:Disable()
 			else
 				BadapplesFrameAddButton:Enable()
@@ -1176,7 +1180,7 @@ function Badapples.Frame_Add()
 		local name = UnitName("target")
 		if (name and (name ~= "")) then
 			name = Badapples.FormatName(name)
-			if (not BadapplesState.Servers[_serverName].List[name]) then
+			if (not BadapplesState.List[name]) then
 				-- Request confirmation before we add the targetted player
 				local dialogFrame = StaticPopup_Show("BADAPPLE_ADD_CONFIRM", name)
 				if (dialogFrame) then
@@ -1201,8 +1205,8 @@ end
 
 
 function Badapples.Frame_EditReason()
-	if (BadapplesFrame.SelectedName and BadapplesState.Servers[_serverName].List[BadapplesFrame.SelectedName]) then
-		local reason = BadapplesState.Servers[_serverName].List[BadapplesFrame.SelectedName].Reason
+	if (BadapplesFrame.SelectedName and BadapplesState.List[BadapplesFrame.SelectedName]) then
+		local reason = BadapplesState.List[BadapplesFrame.SelectedName].Reason
 		if (reason ~= BadapplesFrameEditBox:GetText()) then
 			Badapples.Add(BadapplesFrame.SelectedName.." "..BadapplesFrameEditBox:GetText())
 		end
@@ -1299,8 +1303,11 @@ end
 ------------------------------------------------------------------------------
 -- OnEvent and OnUpdate functions
 ------------------------------------------------------------------------------
-function Badapples.OnEvent(event)
-	if (event == "PLAYER_TARGET_CHANGED") then
+function Badapples.OnEvent(self, event, ...)
+	if self[event] then
+		return self[event](...)
+
+	elseif (event == "PLAYER_TARGET_CHANGED") then
 		if (BadapplesFrame:IsShown()) then
 			Badapples.Frame_ListUpdate()
 		end
@@ -1331,12 +1338,7 @@ function Badapples.OnEvent(event)
 		Badapples.UpdateIgnoreList()
 
 	elseif (event == "PLAYER_LOGIN") then
-		_playerName = UnitName("player")
-		_serverName = GetRealmName()
-		Badapples.VariablesLoaded()
-		if (_serverName and _playerName) then
-			Badapples.PlayerLogin()
-		end
+		Badapples.PLAYER_LOGIN()
 
 	end
 end
@@ -1429,16 +1431,14 @@ end
 function Badapples.CheckName(name)
 	-- Returns the reason text, or L.NO_REASON if the provided
 	-- name is on the player's badapples list, or nil otherwise.
-	if (_serverName and BadapplesState.Servers and BadapplesState.Servers[_serverName]) then
-		if (name and (name ~= "")) then
-			name = Badapples.FormatName(name)
-			if (BadapplesState.Servers[_serverName].List[name]) then
-				local reason = BadapplesState.Servers[_serverName].List[name].Reason
-				if (not reason) then
-					reason = L.NO_REASON
-				end
-				return reason
+	if (name and (name ~= "")) then
+		name = Badapples.FormatName(name)
+		if (BadapplesState.List[name]) then
+			local reason = BadapplesState.List[name].Reason
+			if (not reason) then
+				reason = L.NO_REASON
 			end
+			return reason
 		end
 	end
 end
